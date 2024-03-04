@@ -1,3 +1,5 @@
+dotenv.config();
+import dotenv from "dotenv";
 import mongoose from "mongoose";
 
 const dbConnection = async () => {
@@ -6,7 +8,7 @@ const dbConnection = async () => {
     console.error("MongoDB connection string is missing!");
     process.exit(1);
   }
-  
+
   try {
     await mongoose.connect(dbUri);
     console.log("DB Connected Successfully");
