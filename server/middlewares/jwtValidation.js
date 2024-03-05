@@ -1,12 +1,12 @@
 dotenv.config();
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
+import JWT from "jsonwebtoken";
 
 const secret = process.env.JWT_SECRET_KEY;
 
 export default function validateToken(req, res, next) {
   const authHeader = req.headers["authorization"]; // Middleware function to validate JWT tokens
-  if (!authHeader) {
+  if (!authHeader || !authHeader.startsWith("Bearer")) {
     return res.status(401).send("A token is required for authentication");
   }
 
@@ -17,7 +17,7 @@ export default function validateToken(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, secret); // Verify the token using the secret key and decode it
+    const decoded = JWT.verify(token, secret); // Verify the token using the secret key and decode it
     req.user = decoded;
   } catch (error) {
     return res.status(400).send("Invalid Token");
