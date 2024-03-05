@@ -28,17 +28,13 @@ const userSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
-    location: {
-      type: String,
-      default: "Sri Lanka",
-      required: true,
-    },
   },
   { timestamps: true }
 );
 
 // Hash the password before saving the user to the database
 userSchema.pre("save", async function () {
+  if (!this.isModified) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });

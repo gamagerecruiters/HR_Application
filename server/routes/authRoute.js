@@ -2,8 +2,7 @@ import express from "express";
 import {
   loginController,
   registerController,
-} from "../controllers/authController.js";
-import validateToken from "../middlewares/jwtValidation.js";
+} from "../controllers/authController.js"; //* Import the loginController and registerController from the controllers folder
 
 const authRoute = express.Router();
 
@@ -11,6 +10,6 @@ const authRoute = express.Router();
 authRoute.post("/register", registerController); // Use authRoute instead of router
 
 // POST || LOGIN /api-v1/auth/login
-authRoute.post("/login", validateToken, loginController); // Use authRoute instead of router
+authRoute.post("/login", loginController); // Use authRoute instead of router
 
 export default authRoute;
