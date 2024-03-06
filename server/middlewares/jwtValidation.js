@@ -18,6 +18,7 @@ export default function validateToken(req, res, next) {
 
   try {
     const decoded = JWT.verify(token, secret); // Verify the token using the secret key and decode it
+    console.log("decoded : ", decoded)
     req.user = decoded;
   } catch (error) {
     return res.status(400).send("Invalid Token");
