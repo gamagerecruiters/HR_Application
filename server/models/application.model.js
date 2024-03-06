@@ -5,24 +5,25 @@ import JWT from "jsonwebtoken";
 // Application Schema for the database
 const applicationSchema = new mongoose.Schema(
   {
-    DOB: {
-      type: Date,
+    jobTitle: {
+      type: String,
       required: true,
     },
-    address: {
+    location: {
       type: String,
       required: true,
       maxlength: 50,
     },
     experienceLevel: {
       type: String,
+      enum: ["Beginner", "Intermediate", "Advanced"],
       required: true,
     },
     jobPosition: {
       type: String,
       required: [true, "Job Position is required"],
       enum: [
-        "SoftwareEngineer",
+        "Software Engineer",
         "QA Engineer",
         "DevOps Engineer",
         "Product Manager",
@@ -53,19 +54,11 @@ const applicationSchema = new mongoose.Schema(
       ],
       default: "Full-time",
     },
-    createdBy: {
-      type: mongoose.Types.ObjectId,
-      ref: "User",
-    },
-    resume: {
+    description: {
       type: String,
       required: true,
     },
-    coverLetter: {
-      type: String,
-      required: true,
-    },
-    postDate: {
+    datePosted: {
       type: Date,
       default: Date.now,
     },
