@@ -15,10 +15,10 @@ const router = express.Router();
 
 
 
-// UPDATE USERS || PUT /api-v1/user/:id
-router.put("/update-user", validateToken, updateUserController); 
+// UPDATE USERS || PATCH /api-v1/user/:id
+router.patch("/update-user/:userId", validateToken, updateUserController); 
 
 // DELETE USERS || DELETE /api-v1/user/:id
-router.delete("/delete-user", validateToken ,deleteUserController )
+router.delete("/delete-user/:userId", validateToken ,deleteUserController )
 
 export default router;
