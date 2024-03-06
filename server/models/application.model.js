@@ -22,7 +22,7 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       required: [true, "Job Position is required"],
       enum: [
-        "Software Engineer",
+        "SoftwareEngineer",
         "QA Engineer",
         "DevOps Engineer",
         "Product Manager",
