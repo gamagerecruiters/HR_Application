@@ -4,16 +4,24 @@ import moment from "moment";
 
 //* === Create a job application ===
 export const createJobController = async (req, res, next) => {
-  const { DOB, address, experienceLevel, jobPosition, resume, coverLetter } =
-    req.body;
+  const {
+    jobTitle,
+    location,
+    experienceLevel,
+    jobPosition,
+    jobCategory,
+    description,
+    datePosted,
+  } = req.body;
   try {
     if (
-      !DOB ||
-      !address ||
+      !jobTitle ||
+      !location ||
       !experienceLevel ||
       !jobPosition ||
-      !resume ||
-      !coverLetter
+      !jobCategory ||
+      !description ||
+      !datePosted
     ) {
       throw new Error("Please provide all fields");
     }
@@ -21,6 +29,7 @@ export const createJobController = async (req, res, next) => {
     req.body.createdBy = req.user._id; // Add the user id to the job application
 
     const job = await ApplicationModel.create(req.body);
+    console.log(req.body);
     res.status(201).send({ job });
   } catch (error) {
     next(error);
@@ -30,7 +39,17 @@ export const createJobController = async (req, res, next) => {
 //* === Get all the jobs created by the user ===
 export const getJobsController = async (req, res, next) => {
   try {
-    const { jobPosition, jobCategory, search, sort } = req.query;
+    const {
+      jobTitle,
+      experienceLevel,
+      location,
+      jobPosition,
+      jobCategory,
+      description,
+      datePosted,
+      search,
+      sort,
+    } = req.query;
     //condition to check if the user is filtering the jobs
     const queryObject = {
       createdBy: req.user._id,
@@ -41,6 +60,15 @@ export const getJobsController = async (req, res, next) => {
     }
     if (jobCategory && jobCategory !== "all") {
       queryObject.jobCategory = jobCategory;
+    }
+    if (experienceLevel && experienceLevel !== "all") {
+      queryObject.experienceLevel = experienceLevel;
+    }
+    if (location && location !== "all") {
+      queryObject.location = location;
+    }
+    if (datePosted && datePosted !== "all") {
+      queryObject.datePosted = datePosted;
     }
     if (search) {
       queryObject.jobPosition = { $regex: search, $options: "i" };
@@ -61,9 +89,21 @@ export const getJobsController = async (req, res, next) => {
     if (sort === "Z-A") {
       queryResult = queryResult.sort("-jobPosition");
     }
+
+    //pagination logic
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    queryResult = queryResult.skip(skip).limit(limit);
+
+    //Jobs count
+    const totalJobs = await ApplicationModel.countDocuments(queryObject);
+    const numOfPages = Math.ceil(totalJobs / limit);
+
     const jobs = await queryResult;
     // const jobs = await ApplicationModel.find({ createdBy: req.user._id }); // Find all the jobs created by the user
-    res.status(200).send({ totalJobs: jobs.length, jobs });
+    res.status(200).send({ totalJobs, jobs, numOfPages });
   } catch (error) {
     next(error);
   }
