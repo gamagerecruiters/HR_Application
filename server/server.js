@@ -1,4 +1,8 @@
 import express from "express";
+import expressLayouts from "express-ejs-layouts";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 //API Documentation
 import swaggerUi from "swagger-ui-express";
 import swaggerDoc from "swagger-jsdoc";
@@ -19,6 +23,9 @@ import errorMiddleware from "./middlewares/errorMiddleware.js";
 dotenv.config();
 
 const app = express(); //Rest object
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const PORT = process.env.PORT || 8800;
 
@@ -65,6 +72,10 @@ app.use(morgan("dev"));
 app.use(`/api-doc`, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(router);
+app.use(expressLayouts);
+app.set("view engine", "ejs");
+app.use(express.static(path.join(__dirname, "public"))); //Serving static files in Express
+app.use("/docs", express.static(path.join(__dirname, "docs"))); //Serving static files in Express for PDF
 
 //error middleware
 app.use(errorMiddleware);

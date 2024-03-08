@@ -7,6 +7,7 @@ import {
   updateJobController,
 } from "../controllers/jobsController.js"; //* Import the createJobController and getJobsController from the controllers folder
 import validateToken from "../middlewares/jwtValidation.js";
+import reportGenerateController from "../controllers/reportGenerateController.js";
 
 const router = express.Router();
 
@@ -31,14 +32,18 @@ const router = express.Router();
  *     - datePosted
  *    properties:
  *     jobTitle:
- *      type: date
- *      description: The Birthday of the candidate
+ *      type: string
+ *      description: The title of the job
  *     location:
  *      type: string
- *      description: The address of the candidate
+ *      description: The location of the job
  *     experienceLevel:
  *      type: string
- *      description: The experience level of the candidate
+ *      enum:
+ *       - "Beginner"
+ *       - "Intermediate"
+ *       - "Advanced"
+ *      description: The experience level considered for the job
  *     jobPosition:
  *      type: string
  *      enum:
@@ -71,10 +76,11 @@ const router = express.Router();
  *      description: The job category of the candidate
  *     description:
  *      type: string
- *      description: The resume of the candidate
+ *      description: The description of the job
  *     datePosted:
  *      type: string
- *      description: The cover letter of the candidate
+ *      format: date-time
+ *      description: The date the job was posted
  */
 
 /**
@@ -83,10 +89,10 @@ const router = express.Router();
  *   post:
  *     summary: Create a new job
  *     tags: [Jobs]
+ *     requestBody:
+ *      required: true
  *     security:
  *       - bearerAuth: []
- *     consumes:
- *       - multipart/form-data
  *     parameters:
  *       - in: formData
  *         name: jobTitle
@@ -109,10 +115,10 @@ const router = express.Router();
  *       - in: formData
  *         name: datePosted
  *         type: string
- *         format: date
+ *         format: date-time
  *     responses:
  *       200:
- *         description: The created job
+ *         description: The job was successfully created
  *         content:
  *           application/json:
  *             schema:
@@ -126,7 +132,7 @@ const router = express.Router();
  *   get:
  *     summary: Get all jobs
  *     tags: [Jobs]
- *     securitySchemes:
+ *     security:
  *       - bearerAuth:
  *     responses:
  *       200:
@@ -144,7 +150,7 @@ const router = express.Router();
  *   patch:
  *     summary: Update a job by ID
  *     tags: [Jobs]
- *     securitySchemes:
+ *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -175,7 +181,7 @@ const router = express.Router();
  *   delete:
  *     summary: Delete a job by ID
  *     tags: [Jobs]
- *     securitySchemes:
+ *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -204,7 +210,7 @@ const router = express.Router();
  *   get:
  *     summary: Get job statistics
  *     tags: [Jobs]
- *     securitySchemes:
+ *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
@@ -237,5 +243,8 @@ router.delete("/delete-job/:id", deleteJobController);
 
 // JOBS STATS || GET /api-v1/job/job-stats
 router.get("/job-stats", jobStatsController);
+
+// REPORT GENERATE || GET /api-v1/job/report
+router.get("/report/:id", reportGenerateController);
 
 export default router;
