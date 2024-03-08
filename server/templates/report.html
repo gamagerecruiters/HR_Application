@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .content {
+        margin: 0 auto;
+        width: 60%;
+      }
+      .field {
+        margin-bottom: 20px;
+      }
+      .field span {
+        font-weight: bold;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="jumbotron text-center">
+        <h1 class="display-4">Job Application Report</h1>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{jobTitle}}</h5>
+          <p class="card-text">
+            <strong>Location:</strong> {{location}}<br />
+            <strong>Experience Level:</strong> {{experienceLevel}}<br />
+            <strong>Job Position:</strong> {{jobPosition}}<br />
+            <strong>Job Category:</strong> {{jobCategory}}<br />
+            <strong>Description:</strong> {{description}}<br />
+            <strong>Date Posted:</strong> {{datePosted}}
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

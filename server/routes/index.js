@@ -9,6 +9,6 @@ const path = "/api-v1/";
 
 router.use(`${path}auth`, authRoute); //api-v1/auth/
 router.use(`${path}user`, userRoute); //api-v1/user/
-router.use(`${path}job`, jobsRoute); //api-v1/jobs/
+router.use(`${path}job`, jobsRoute); //api-v1/job/
 
 export default router;
