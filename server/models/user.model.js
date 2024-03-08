@@ -24,10 +24,32 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+    Designation: {
+      type: String,
+      required: true,
+    },
+    employmentType: {
+      type: String,
+      enum: ['Intern', 'Contract-Basis', 'Permanent'], // Only accept 'Intern' or 'Contract-Basis' or 'Permanent' values
+      default : 'Intern'
+    },
+    userType: {
+      type: String,
+      enum: ['Admin', 'User'], // Only accept 'Admin' or 'User' values
+      default : 'User'
+    },
     phone: {
       type: Number,
       required: false,
     },
+    // Google Authentication part
+    googleId: {
+      type: String,
+      unique: true,
+      sparse : true
+    },
+    displayName:String,
+    image: String
     
   },
   { timestamps: true }

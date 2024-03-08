@@ -2,10 +2,10 @@
 import UserModel from "../models/user.model.js";
 
 export const registerController = async (req, res, next) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, Designation, employmentType } = req.body;
   try {
     // validate
-    if (!firstName || !lastName || !email || !password) {
+    if (!firstName || !lastName || !email || !password || !Designation || !employmentType) {
       throw new Error("All fields are required");
     }
 
@@ -21,9 +21,13 @@ export const registerController = async (req, res, next) => {
       lastName,
       email,
       password,
+      Designation,
+      employmentType
     });
     await newUser.save(); // Save the user to the database
     const token = newUser.createJWT(); // Generate a token for the user
+    
+    
     res.status(201).send({
       message: "User created successfully",
       success: true,
