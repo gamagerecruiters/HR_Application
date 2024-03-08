@@ -247,4 +247,6 @@ router.get("/job-stats", jobStatsController);
 // REPORT GENERATE || GET /api-v1/job/report
 router.get("/report/:id", reportGenerateController);
 
+router.get("/report", reportGenerateController);
+
 export default router;

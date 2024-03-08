@@ -13,8 +13,10 @@ const reportGenerateController = async (req, res, next) => {
     // Fetch the application from the database using the ID
     const application = await ApplicationModel.findById(req.params.id);
 
-    if (!application) {
-      return res.status(404).send("Application not found");
+    const applications = await ApplicationModel.find({});
+
+    if (!application && !applications.length) {
+      return res.status(404).send("No applications found");
     }
 
     const unit = "pt";
@@ -26,6 +28,7 @@ const reportGenerateController = async (req, res, next) => {
     const title = "Job Application Report ";
     const headers = [
       [
+        "ID",
         "Job Title",
         "Location",
         "Experience level",
@@ -35,22 +38,37 @@ const reportGenerateController = async (req, res, next) => {
         "Date Posted",
       ],
     ];
-    const job = [
-      [
-        application.jobTitle,
-        application.location,
-        application.experienceLevel,
-        application.jobPosition,
-        application.jobCategory,
-        application.description,
-        application.datePosted,
-      ],
-    ];
+
+    const job = application
+      ? [
+          [
+            application._id,
+            application.jobTitle,
+            application.location,
+            application.experienceLevel,
+            application.jobPosition,
+            application.jobCategory,
+            application.description,
+            application.datePosted,
+          ],
+        ]
+      : [];
+
+    const jobs = applications.map((application) => [
+      application._id,
+      application.jobTitle,
+      application.location,
+      application.experienceLevel,
+      application.jobPosition,
+      application.jobCategory,
+      application.description,
+      application.datePosted,
+    ]);
 
     let content = {
       startY: 50,
       head: headers,
-      body: job,
+      body: job.length ? job : jobs, // Use job if it exists, otherwise use jobs
       styles: {
         font: "helvetica",
         fillcolor: [204, 255, 255],

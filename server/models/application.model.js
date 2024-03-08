@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 import JWT from "jsonwebtoken";
+import shortid from "shortid";
 // import bcrypt from "bcryptjs";
 
 // Application Schema for the database
 const applicationSchema = new mongoose.Schema(
   {
+    _id: { type: String, default: shortid.generate },
     jobTitle: {
       type: String,
       required: true,
