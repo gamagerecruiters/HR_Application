@@ -1,68 +1,49 @@
 import UserModel from "../models/user.model.js"; //* Import the UserModel from the models folder
 
-export const addUserController = async (req, res, next) => {
-  const { firstName, lastName, email, phone  } = req.body;
+export const deleteUserController = async (req, res, next) => {
+  const { userId } = req.params;
   try {
-    if (!firstName || !lastName || !email || !phone) {
-      // Check if all fields are provided
-      throw new Error("Please provide all fields");
+    const deletedUser = await UserModel.findByIdAndDelete({ _id: userId });
+
+    if (!deletedUser) {
+      return res
+        .status(404)
+        .send({ message: "User not found", success: false });
     }
-    // dummyPassword needs to be saved in .env file
-    const dummyPassword = "12345678";
-    const userObj = {
-      firstName, 
-      lastName, 
-      email, 
-      phone,
-      password : dummyPassword
-    }
-    const user = await UserModel.create(
-      // Create user object and save it as document to the UserModel.
-      userObj
-    );
-    
-    const token = user.createJWT();
-    res.status(201).send({
-      user,
-      token,
-    });
+
+    res
+      .status(200)
+      .send({ message: "User deleted successfully", success: true });
   } catch (error) {
     next(error);
   }
 };
 
-export const deleteUserController = async (req, res, next) => {
-  // const {userId} = req.params;
-  try{
-    const deletedUser = await UserModel.findByIdAndDelete({_id : req.user._id});
-
-    if(!deletedUser){
-      return res.status(404).send({message : "User not found"})
-    }
-
-    res.status(200).send({ message: "User deleted successfully" });
-  } catch(error){
-    next(error)
-  }
-}
 
 
 export const updateUserController = async (req, res, next) => {
-  const { firstName, lastName, email, phone } = req.body;
+  const { userId } = req.params;
+  const { firstName, lastName, email, phone, designation, employmentType } =
+    req.body;
   try {
-    if (!firstName || !lastName || !email || !phone) {
-      // Check if all fields are provided
-      throw new Error("Please provide all fields");
+    const user = await UserModel.findOne({ _id: userId });
+
+    if (!user){
+      res.status(404).send({message : "User Not Found", success : false})
     }
-    const user = await UserModel.findOneAndUpdate(
-      // Find the user by id and update the user
-      { _id: req.user._id },
-      { firstName, lastName, email, phone },
-      { new: true }
-    );
+
+    if (firstName) user.firstName = firstName
+    if (lastName) user.lastName = lastName
+    if (email) user.email = email
+    if (phone) user.phone = phone
+    if (designation) user.Designation = designation
+    if (employmentType) user.employmentType = employmentType
+    
     await user.save();
     const token = user.createJWT();
     res.status(200).send({
+      message : "User Updated Successfully",
+      success : true,
       user,
       token,
     });
