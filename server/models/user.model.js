@@ -38,6 +38,12 @@ const userSchema = new mongoose.Schema(
       enum: ['Admin', 'User'], // Only accept 'Admin' or 'User' values
       default : 'User'
     },
+    status: {
+      type: String,
+      enum: ['Active', 'Inactive'], // Only accept 'Active' or 'Inactive' values
+      default : 'Active',
+      required : false,
+    },
     phone: {
       type: Number,
       required: false,
