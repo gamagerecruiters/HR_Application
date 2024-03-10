@@ -22,7 +22,7 @@ export const registerController = async (req, res, next) => {
       email,
       password,
       Designation,
-      employmentType
+      employmentType,
     });
     await newUser.save(); // Save the user to the database
     const token = newUser.createJWT(); // Generate a token for the user
