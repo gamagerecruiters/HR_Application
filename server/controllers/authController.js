@@ -1,72 +1,82 @@
 // Imported the UserModel from the models folder
 import UserModel from "../models/user.model.js";
+import ErrorHandler from "../middlewares/error.js";
+import { catchAsyncError } from "../middlewares/catchAsyncError.js";
+import { sendToken } from "../middlewares/jwtValidation.js";
 
-export const registerController = async (req, res, next) => {
-  const { firstName, lastName, email, password, Designation, employmentType } = req.body;
+export const registerController = catchAsyncError(async (req, res, next) => {
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    designation,
+    employmentType,
+    userType,
+  } = req.body;
   try {
     // validate
-    if (!firstName || !lastName || !email || !password || !Designation || !employmentType) {
-      throw new Error("All fields are required");
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password ||
+      !designation ||
+      !employmentType ||
+      !userType
+    ) {
+      return next(new ErrorHandler(400, "Please provide all fields!"));
     }
 
     // Check if the user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      throw new Error("User already exists");
+      return next(new ErrorHandler(400, "Email is already taken!"));
     }
 
     // Create a new user if the user does not exist
-    const newUser = await UserModel({
+    const newUser = new UserModel({
       firstName,
       lastName,
       email,
       password,
-      Designation,
+      designation,
       employmentType,
+      userType,
     });
     await newUser.save(); // Save the user to the database
-    const token = newUser.createJWT(); // Generate a token for the user
-    
-    
-    res.status(201).send({
-      message: "User created successfully",
-      success: true,
-      newUser,
-      token,
-    });
+
+    sendToken(newUser, 200, res, "User registered successfully!"); // Send the token to the user
   } catch (error) {
     next(error); // Pass error to error middleware
   }
-};
+});
 
 export const loginController = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, userType } = req.body;
   try {
     // validate
-    if (!email || !password) {
-      throw new Error("Please provide all fields");
+    if (!email || !password || !userType) {
+      return next(new ErrorHandler(400, "Please provide all fields!"));
     }
 
     // Check if the user exists
     const existingUser = await UserModel.findOne({ email }).select("+password");
     if (!existingUser) {
-      throw new Error("User does not exist");
+      return next(new ErrorHandler(400, "Invalid email or password!"));
     }
 
     // Check if the password is correct
     const isMatch = await existingUser.comparePassword(password);
     if (!isMatch) {
-      throw new Error("Invalid password");
+      return next(new ErrorHandler(400, "Invalid email or password!"));
     }
 
-    existingUser.password = undefined; // Remove the password from the user object
-    const token = existingUser.createJWT(); // Generate a token for the user
-    res.status(200).send({
-      message: "User logged in successfully",
-      success: true,
-      existingUser,
-      token,
-    });
+    if (existingUser.userType !== userType) {
+      return next(new ErrorHandler(400, "Invalid user type!"));
+    }
+
+    sendToken(existingUser, 200, res, "User logged in successfully!"); // Send the token to the user
   } catch (error) {
     next(error); // Pass error to error middleware
   }

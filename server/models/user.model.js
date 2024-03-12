@@ -23,26 +23,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
+      select: false, // Do not show the password in the response
     },
-    Designation: {
+    designation: {
       type: String,
       required: true,
     },
     employmentType: {
       type: String,
-      enum: ['Intern', 'Contract-Basis', 'Permanent'], // Only accept 'Intern' or 'Contract-Basis' or 'Permanent' values
-      default : 'Intern'
+      enum: ["Intern", "Contract-Basis", "Permanent"], // Only accept 'Intern' or 'Contract-Basis' or 'Permanent' values
+      default: "Intern",
     },
     userType: {
       type: String,
-      enum: ['Admin', 'User'], // Only accept 'Admin' or 'User' values
-      default : 'User'
+      enum: ["Admin", "User"], // Only accept 'Admin' or 'User' values
+      default: "User",
     },
     status: {
       type: String,
-      enum: ['Active', 'Inactive'], // Only accept 'Active' or 'Inactive' values
-      default : 'Active',
-      required : false,
+      enum: ["Active", "Inactive"], // Only accept 'Active' or 'Inactive' values
+      default: "Active",
+      required: false,
     },
     phone: {
       type: Number,
@@ -52,11 +53,10 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
       unique: true,
-      sparse : true
+      sparse: true,
     },
-    displayName:String,
-    image: String
-    
+    displayName: String,
+    image: String,
   },
   { timestamps: true }
 );
@@ -75,7 +75,7 @@ userSchema.methods.comparePassword = async function (password) {
 };
 
 // Generate a JWT token for the user
-userSchema.methods.createJWT = function () {
+userSchema.methods.getJWTToken = function () {
   const token = JWT.sign({ _id: this._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: "1d",
   });
