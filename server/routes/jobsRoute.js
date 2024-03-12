@@ -8,12 +8,13 @@ import {
 } from "../controllers/jobsController.js"; //* Import the createJobController and getJobsController from the controllers folder
 import { sendToken } from "../middlewares/jwtValidation.js";
 import reportGenerateController from "../controllers/reportGenerateController.js";
+import { isAuthorized } from "../middlewares/auth.js";
 
 const router = express.Router();
 
 //Routes
 // CREATE JOB || POST /api-v1/job/create-job
-router.post("/create-job", sendToken, createJobController);
+router.post("/create-job", isAuthorized, createJobController);
 
 // GET JOBS || GET /api-v1/job/get-job
 router.get("/get-job", getJobsController);
