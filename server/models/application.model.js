@@ -1,28 +1,31 @@
-import mongoose from "mongoose";
+import shortid from "shortid";
 import JWT from "jsonwebtoken";
+import mongoose from "mongoose";
 // import bcrypt from "bcryptjs";
 
 // Application Schema for the database
 const applicationSchema = new mongoose.Schema(
   {
-    DOB: {
-      type: Date,
-      required: true,
-    },
-    address: {
+    _id: { type: String, default: shortid.generate },
+    jobTitle: {
       type: String,
       required: true,
+    },
+    location: {
+      type: String,
+      required: [true, "Please provide a location for the job"],
       maxlength: 50,
     },
     experienceLevel: {
       type: String,
+      enum: ["Beginner", "Intermediate", "Advanced"],
       required: true,
     },
     jobPosition: {
       type: String,
       required: [true, "Job Position is required"],
       enum: [
-        "SoftwareEngineer",
+        "Software Engineer",
         "QA Engineer",
         "DevOps Engineer",
         "Product Manager",
@@ -42,7 +45,7 @@ const applicationSchema = new mongoose.Schema(
     },
     jobCategory: {
       type: String,
-      required: true,
+      required: [true, "Job Category is required"],
       enum: [
         "Full-time",
         "Part-time",
@@ -53,21 +56,24 @@ const applicationSchema = new mongoose.Schema(
       ],
       default: "Full-time",
     },
-    createdBy: {
-      type: mongoose.Types.ObjectId,
-      ref: "User",
-    },
-    resume: {
+    description: {
       type: String,
-      required: true,
+      required: [, "Please provide a job description"],
+      minLength: [5, "Job description must be at least 5 characters long"],
+      maxLength: [350, "Job description must not exceed 350 characters"],
     },
-    coverLetter: {
-      type: String,
-      required: true,
+    expired: {
+      type: Boolean,
+      default: false,
     },
-    postDate: {
+    datePosted: {
       type: Date,
       default: Date.now,
+    },
+    postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   { timestamps: true }
@@ -85,12 +91,12 @@ const applicationSchema = new mongoose.Schema(
 //   return isMatch;
 // };
 // Generate a JWT token for the user
-applicationSchema.methods.createJWT = function () {
-  const token = JWT.sign({ _id: this._id }, process.env.JWT_SECRET_KEY, {
-    expiresIn: "1d",
-  });
-  return token;
-};
+// applicationSchema.methods.getJWTToken = function () {
+//   const token = JWT.sign({ _id: this._id }, process.env.JWT_SECRET_KEY, {
+//     expiresIn: "1d",
+//   });
+//   return token;
+// };
 const ApplicationModel = mongoose.model("Application", applicationSchema);
 
 export default ApplicationModel;
