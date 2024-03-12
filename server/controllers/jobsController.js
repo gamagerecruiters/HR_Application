@@ -1,6 +1,6 @@
-import ApplicationModel from "../models/application.model.js"; //* Import the ApplicationModel from the models folder
-import mongoose from "mongoose"; //* Import mongoose
 import moment from "moment";
+import mongoose from "mongoose"; //* Import mongoose
+import ApplicationModel from "../models/application.model.js"; //* Import the ApplicationModel from the models folder
 
 //* === Create a job application ===
 export const createJobController = async (req, res, next) => {
@@ -124,10 +124,10 @@ export const updateJobController = async (req, res, next) => {
     } = req.body;
 
     //find the job application by id and update the job application
-    const job = await ApplicationModel.findOne({ _id: id });
+    let job = await ApplicationModel.findOne({ _id: id });
 
     if (!job) {
-      throw new Error("Job application not found");
+      throw new Error("Oops, Job application not found!");
     }
     if (!req.user._id === job.createdBy.toString()) {
       throw new Error("You are not authorized to update this job application");
@@ -140,7 +140,11 @@ export const updateJobController = async (req, res, next) => {
         runValidators: true,
       }
     );
-    res.status(200).send({ updateJob });
+    res.status(200).json({
+      success: true,
+      updateJob,
+      message: "Job application updated successfully!",
+    });
   } catch (error) {
     next(error);
   }
@@ -171,7 +175,7 @@ export const jobStatsController = async (req, res) => {
     const stats = await ApplicationModel.aggregate([
       {
         $match: {
-          createdBy: new mongoose.Types.ObjectId(req.user._id),
+          createdBy: new mongoose.Schema.Types.ObjectId(req.user._id),
         },
       },
       {
@@ -191,7 +195,7 @@ export const jobStatsController = async (req, res) => {
     let monthlyApplication = await ApplicationModel.aggregate([
       {
         $match: {
-          createdBy: new mongoose.Types.ObjectId(req.user._id),
+          createdBy: new mongoose.Schema.Types.ObjectId(req.user._id),
         },
       },
       {
