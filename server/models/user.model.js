@@ -1,7 +1,7 @@
+import bcrypt from "bcryptjs";
+import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
 import validator from "validator";
-import JWT from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
     },
     designation: {
       type: String,
-      required: true,
+      required: false,
     },
     employmentType: {
       type: String,
@@ -67,6 +67,8 @@ userSchema.pre("save", async function () {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
+
+
 
 // Compare the password with the hashed password in the database
 userSchema.methods.comparePassword = async function (password) {
