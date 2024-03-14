@@ -1,5 +1,4 @@
 import shortid from "shortid";
-import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
 // import bcrypt from "bcryptjs";
 
@@ -70,6 +69,11 @@ const applicationSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   { timestamps: true }
 );
@@ -86,12 +90,12 @@ const applicationSchema = new mongoose.Schema(
 //   return isMatch;
 // };
 // Generate a JWT token for the user
-applicationSchema.methods.createJWT = function () {
-  const token = JWT.sign({ _id: this._id }, process.env.JWT_SECRET_KEY, {
-    expiresIn: "1d",
-  });
-  return token;
-};
+// applicationSchema.methods.getJWTToken = function () {
+//   const token = JWT.sign({ _id: this._id }, process.env.JWT_SECRET_KEY, {
+//     expiresIn: "1d",
+//   });
+//   return token;
+// };
 const ApplicationModel = mongoose.model("Application", applicationSchema);
 
 export default ApplicationModel;

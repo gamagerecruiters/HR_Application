@@ -19,7 +19,10 @@ export const errorMiddleware = (err, req, res, next) => {
     err = new ErrorHandler(409, message);
   }
   if (err.name === "JsonWebTokenError") {
-    const message = `Json web token is invalid. Try Again`;
+    const message =
+      req.path === "/logout"
+        ? "User not authorized!"
+        : `Json web token is invalid. Try Again`;
     err = new ErrorHandler(401, message);
   }
   if (err.name === "TokenExpiredError") {

@@ -81,3 +81,16 @@ export const loginController = async (req, res, next) => {
     next(error); // Pass error to error middleware
   }
 };
+
+export const logoutController = async (req, res, next) => {
+  res
+    .status(201)
+    .cookie("token", null, "", {
+      httpOnly: true,
+      expires: new Date(Date.now()),
+    })
+    .json({
+      success: true,
+      message: "User logged out successfully!",
+    });
+};
