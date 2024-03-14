@@ -1,5 +1,4 @@
 import shortid from "shortid";
-import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
 // import bcrypt from "bcryptjs";
 

@@ -31,7 +31,7 @@ const app = express(); //Rest object
 const cloudinaryDB = cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLIENT_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  api_secret: process.env.CLOUDINARY_CLIENT_SECRET,
 });
 
 export default cloudinaryDB;
@@ -68,7 +68,6 @@ app.use(morgan("dev"));
 
 app.use(router);
 app.use(expressLayouts);
-app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public"))); //Serving static files in Express
 // app.use("/docs", express.static(path.join(__dirname, "docs"))); //Serving static files in Express for PDF
 

@@ -17,13 +17,13 @@ const router = express.Router();
 router.post("/create-job", isAuthorized, createJobController);
 
 // GET JOBS || GET /api-v1/job/get-job
-router.get("/get-job", getJobsController);
+router.get("/getAll", getJobsController);
 
 // UPDATE JOB || PUT || PATCH /api-v1/job/update-job/:id
-router.patch("/update-job/:id", updateJobController);
+router.patch("/update-job/:id", isAuthorized, updateJobController);
 
 // DELETE JOB || DELETE /api-v1/job/delete-job/:id
-router.delete("/delete-job/:id", deleteJobController);
+router.delete("/delete-job/:id", isAuthorized, deleteJobController);
 
 // JOBS STATS || GET /api-v1/job/job-stats
 router.get("/job-stats", jobStatsController);
