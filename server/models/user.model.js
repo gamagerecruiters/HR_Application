@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
     },
     designation: {
       type: String,
-      required: true,
+      required: false,
     },
     employmentType: {
       type: String,
@@ -54,6 +54,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true,
+      required: false,
     },
     displayName: String,
     image: String,

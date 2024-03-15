@@ -1,8 +1,8 @@
 import moment from "moment";
 import mongoose from "mongoose"; //* Import mongoose
 import ErrorHandler from "../middlewares/error.js";
-import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ApplicationModel from "../models/application.model.js"; //* Import the ApplicationModel from the models folder
+import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 
 //* === Create a job application ===
 export const createJobController = catchAsyncError(async (req, res, next) => {
@@ -43,37 +43,6 @@ export const createJobController = catchAsyncError(async (req, res, next) => {
     message: "Job application created successfully",
     job,
   });
-
-  // const {
-  //   jobTitle,
-  //   location,
-  //   experienceLevel,
-  //   jobPosition,
-  //   jobCategory,
-  //   description,
-  //   datePosted,
-  // } = req.body;
-  // try {
-  //   if (
-  //     !jobTitle ||
-  //     !location ||
-  //     !experienceLevel ||
-  //     !jobPosition ||
-  //     !jobCategory ||
-  //     !description ||
-  //     !datePosted
-  //   ) {
-  //     throw new Error("Please provide all fields");
-  //   }
-
-  //   req.body.createdBy = req.user._id; // Add the user id to the job application
-
-  //   const job = await ApplicationModel.create(req.body);
-  //   console.log(req.body);
-  //   res.status(201).send({ job });
-  // } catch (error) {
-  //   next(error);
-  // }
 });
 
 //* === Get all the jobs created by the user ===
