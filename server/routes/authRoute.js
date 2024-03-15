@@ -1,6 +1,7 @@
 import express from "express";
 import { isAuthorized } from "../middlewares/auth.js"; //* Import the isAuthorized middleware from the middlewares folder
 import {
+  getUser,
   loginController,
   logoutController,
   registerController,
@@ -16,5 +17,8 @@ authRoute.post("/login", loginController); // Use authRoute instead of router
 
 // GET || LOGOUT /api-v1/auth/logout
 authRoute.get("/logout", isAuthorized, logoutController); // Use authRoute instead of router
+
+// GET || GET USER /api-v1/auth/getUser
+authRoute.get("/getUser", isAuthorized, getUser); // Use authRoute instead of router
 
 export default authRoute;
