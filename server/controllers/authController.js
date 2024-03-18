@@ -10,6 +10,7 @@ export const registerController = catchAsyncError(async (req, res, next) => {
     lastName,
     email,
     password,
+    phone,
     designation,
     employmentType,
     userType,
@@ -34,8 +35,7 @@ export const registerController = catchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler(400, "Email is already taken!"));
     }
 
-    // Create a new user if the user does not exist
-    const newUser = new UserModel({
+    const newUserObject = {
       firstName,
       lastName,
       email,
@@ -43,8 +43,19 @@ export const registerController = catchAsyncError(async (req, res, next) => {
       designation,
       employmentType,
       userType,
-    });
+    };
+
+    // Add phone if it has a value
+    if (phone) {
+      newUserObject.phone = phone;
+    }
+
+
+
+    // Create a new user if the user does not exist
+    const newUser = new UserModel(newUserObject);
     await newUser.save(); // Save the user to the database
+
 
     sendToken(newUser, 200, res, "User registered successfully!"); // Send the token to the user
   } catch (error) {
