@@ -52,7 +52,7 @@ export const registerController = catchAsyncError(async (req, res, next) => {
   }
 });
 
-export const loginController = async (req, res, next) => {
+export const loginController = catchAsyncError(async (req, res, next) => {
   const { email, password, userType } = req.body;
   try {
     // validate
@@ -85,9 +85,9 @@ export const loginController = async (req, res, next) => {
   } catch (error) {
     next(error); // Pass error to error middleware
   }
-};
+});
 
-export const logoutController = async (req, res, next) => {
+export const logoutController = catchAsyncError(async (req, res, next) => {
   res
     .status(201)
     .cookie("token", null, "", {
@@ -98,4 +98,12 @@ export const logoutController = async (req, res, next) => {
       success: true,
       message: "User logged out successfully!",
     });
-};
+});
+
+export const getUser = catchAsyncError(async (req, res, next) => {
+  const user = req.user;
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
