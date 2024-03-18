@@ -2,11 +2,7 @@ import express from "express";
 import authRoute from "./authRoute.js"; //* Imported the authRoute from the routes folder
 import userRoute from "./userRoute.js"; //* Imported the userRoute from the routes folder
 import jobsRoute from "./jobsRoute.js"; //* Imported the jobsRoute from the routes folder
-<<<<<<< HEAD
-import adminRoute from "./adminRoute.js"; //* Imported the adminRoute from the routes folder
-=======
 import applicationRoute from "./applicationRoute.js"; //* Imported the applicationRoute from the routes folder
->>>>>>> e94642cd026f0b3daf773d9f4e8f6e3afb63426e
 
 const router = express.Router();
 

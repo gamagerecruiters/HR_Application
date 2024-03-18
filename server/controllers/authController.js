@@ -76,6 +76,11 @@ export const loginController = async (req, res, next) => {
       return next(new ErrorHandler(400, "Invalid user type!"));
     }
 
+    // check user status is Active or Inactive
+    if (existingUser.status == "Inactive"){
+      return next(new ErrorHandler(400, "User is inactive "));
+    }
+
     sendToken(existingUser, 200, res, "User logged in successfully!"); // Send the token to the user
   } catch (error) {
     next(error); // Pass error to error middleware

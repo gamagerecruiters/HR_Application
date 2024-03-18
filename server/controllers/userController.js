@@ -158,54 +158,7 @@ export const updateUserController = async (req, res, next) => {
   }
 };
 
-export const updateStatusController = async (req, res, next) => {
-  const { userId } = req.params;
-  const { status } = req.body;
 
-  // get req.user from validateToken middleware
-  const loggedUser = req.user;
-
-  try {
-    // Check If  loggedUser not exists
-    if (!loggedUser) {
-      return res.status(401).send({ message: "Unauthorized access", success: false });
-    }
-
-    const loggedUserEntity = await UserModel.findOne({ _id: loggedUser._id });
-
-    // Check If  loggedUserEntity not exists
-    if (!loggedUserEntity) {
-      return res.status(401).send({ message: "Unauthorized access", success: false });
-    }
-
-    // Check If logged User type is Not admin
-    if (loggedUserEntity.userType != "Admin") {
-      return res
-        .status(401)
-        .send({ message: "Admin staff only access", success: false });
-    }
-
-    const user = await UserModel.findOne({ _id: userId });
-
-    if (!user) {
-      return res.status(404).send({ message: "User Not Found", success: false });
-    }
-
-    if (!status) {
-      throw new Error("All fields are required");
-    }
-
-    if (status) user.status = status;
-    await user.save();
-
-    return res.status(200).send({
-      message: "User Status Updated Successfully", 
-      success: true,
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
 
 
 // Update user password controller to update user password After logged In to the system.
