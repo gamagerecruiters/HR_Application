@@ -11,6 +11,9 @@ import {
   getFilteredUserByEmploymentTypeController,
   getFilteredUserByUserTypeController,
   updateUserPasswordController,
+  forgetPasswordSendEmailController,
+  verifyForgotPasswordLinkController,
+  resetPasswordController
 } from "../controllers/userController.js"; //* Import the updateUserController from the controllers folder
 // import validateToken from "../middlewares/jwtValidation.js"; //* Import the validateToken middleware from the middlewares folder
 
@@ -31,6 +34,8 @@ router.get("/get-user-by-employmentType", getFilteredUserByEmploymentTypeControl
 
 router.get("/get-user-by-employmentType-designation", getFilteredUserByEmploymentTypeAndDesignationController)
 
+router.get("/forgotpassword/:id/:token", verifyForgotPasswordLinkController);
+
 
 
 
@@ -38,6 +43,10 @@ router.get("/get-user-by-employmentType-designation", getFilteredUserByEmploymen
 
 // router.post("/add-user", validateToken, addUserController);
 // router.post("/add-user", validateToken , addUserController);
+
+router.post("/sendPasswordLink/", forgetPasswordSendEmailController)
+
+router.post("/reset-password/:id/:token", resetPasswordController )
 
 // UPDATE USERS || PATCH /api-v1/user/:id
 router.patch("/update-user/:userId", updateUserController);

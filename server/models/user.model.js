@@ -23,7 +23,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      // select: false, // Do not show the password in the response
     },
     designation: {
       type: String,
@@ -54,6 +53,10 @@ const userSchema = new mongoose.Schema(
       default : "Gamage Recruiters (Pvt) Ltd",
       required : false
     },
+    verifytoken:{
+      type: String,
+      required : false
+  },
     // Google Authentication part
     googleId: {
       type: String,

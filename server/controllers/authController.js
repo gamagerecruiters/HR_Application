@@ -73,12 +73,14 @@ export const loginController = catchAsyncError(async (req, res, next) => {
 
     // Check if the user exists
     const existingUser = await UserModel.findOne({ email }).select("+password");
+    console.log(existingUser, password)
     if (!existingUser) {
       return next(new ErrorHandler(400, "Invalid email or password!"));
     }
 
     // Check if the password is correct
     const isMatch = await existingUser.comparePassword(password);
+
     if (!isMatch) {
       return next(new ErrorHandler(400, "Invalid email or password!"));
     }
