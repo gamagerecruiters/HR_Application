@@ -1,6 +1,8 @@
 import UserModel from "../models/user.model.js"; //* Import the UserModel from the models folder
 import ErrorHandler from "../middlewares/error.js";
-import mongoose from 'mongoose'; // Import Mongoose for ObjectId validation
+import mongoose from "mongoose"; // Import Mongoose for ObjectId validation
+import { sendForgetPasswordLinkByEmail } from "../utils/mailer.js";
+import jwt from "jsonwebtoken";
 
 // Delete user
 export const deleteUserController = async (req, res, next) => {
@@ -63,8 +65,8 @@ export const getUserController = async (req, res, next) => {
   const { userId } = req.params;
   try {
     // validate
-    if(!userId){
-      throw new ErrorHandler(400, "Please provide all fields!")
+    if (!userId) {
+      throw new ErrorHandler(400, "Please provide all fields!");
     }
     // Find user by Id
     const user = await UserModel.find({ _id: userId });
@@ -99,15 +101,19 @@ export const getUserController = async (req, res, next) => {
 };
 
 // Retrieve user by Designation
-export const getFilteredUserByDesignationController = async (req, res, next) => {
+export const getFilteredUserByDesignationController = async (
+  req,
+  res,
+  next
+) => {
   const { designation } = req.query;
   try {
     // validate
-    if(!designation){
-      throw new ErrorHandler(400, "Please provide all fields!")
+    if (!designation) {
+      throw new ErrorHandler(400, "Please provide all fields!");
     }
     // Find all users with the specified designation
-    const users = await UserModel.find({designation : designation });
+    const users = await UserModel.find({ designation: designation });
 
     if (!users || users.length === 0) {
       return res
@@ -138,17 +144,16 @@ export const getFilteredUserByDesignationController = async (req, res, next) => 
   }
 };
 
-
 // Retrieve user by Designation
 export const getFilteredUserByUserTypeController = async (req, res, next) => {
   const { userType } = req.query;
   try {
     // validate
-    if(!userType){
-      throw new ErrorHandler(400, "Please provide all fields!")
+    if (!userType) {
+      throw new ErrorHandler(400, "Please provide all fields!");
     }
     // Find all users with the specified designation
-    const users = await UserModel.find({userType : userType });
+    const users = await UserModel.find({ userType: userType });
 
     if (!users || users.length === 0) {
       return res
@@ -179,17 +184,20 @@ export const getFilteredUserByUserTypeController = async (req, res, next) => {
   }
 };
 
-
 // Retrieve user by Employment Type
-export const getFilteredUserByEmploymentTypeController = async (req, res, next) => {
+export const getFilteredUserByEmploymentTypeController = async (
+  req,
+  res,
+  next
+) => {
   const { employmentType } = req.query;
   try {
     // validate
-    if(!employmentType){
-      throw new ErrorHandler(400, "Please provide all fields!")
+    if (!employmentType) {
+      throw new ErrorHandler(400, "Please provide all fields!");
     }
     // Find all users with the specified designation
-    const users = await UserModel.find({employmentType : employmentType });
+    const users = await UserModel.find({ employmentType: employmentType });
 
     if (!users || users.length === 0) {
       return res
@@ -221,15 +229,22 @@ export const getFilteredUserByEmploymentTypeController = async (req, res, next) 
 };
 
 // Retrieve user by Employment Type and Designation
-export const getFilteredUserByEmploymentTypeAndDesignationController = async (req, res, next) => {
-  const { employmentType , designation } = req.query; // Retrieve employmentType and  designation as query parameters
+export const getFilteredUserByEmploymentTypeAndDesignationController = async (
+  req,
+  res,
+  next
+) => {
+  const { employmentType, designation } = req.query; // Retrieve employmentType and  designation as query parameters
   try {
     // validate
-    if(!employmentType || !designation){
-      throw new ErrorHandler(400, "Please provide all fields!")
+    if (!employmentType || !designation) {
+      throw new ErrorHandler(400, "Please provide all fields!");
     }
     // Find all users with the specified designation
-    const users = await UserModel.find({employmentType : employmentType , designation : designation });
+    const users = await UserModel.find({
+      employmentType: employmentType,
+      designation: designation,
+    });
 
     if (!users || users.length === 0) {
       return res
@@ -251,7 +266,8 @@ export const getFilteredUserByEmploymentTypeAndDesignationController = async (re
     });
 
     res.status(200).send({
-      message: "User filtered successfully based on Employment Type and Designation",
+      message:
+        "User filtered successfully based on Employment Type and Designation",
       success: true,
       userList: userOutput,
     });
@@ -260,8 +276,6 @@ export const getFilteredUserByEmploymentTypeAndDesignationController = async (re
   }
 };
 
-
-
 export const updateUserController = async (req, res, next) => {
   const { userId } = req.params;
   const { firstName, lastName, email, phone, designation, employmentType } =
@@ -269,11 +283,12 @@ export const updateUserController = async (req, res, next) => {
   try {
     // Check if userId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid userId", success: false });
+      return res
+        .status(400)
+        .json({ message: "Invalid userId", success: false });
     }
 
     const user = await UserModel.findOne({ _id: userId });
-
 
     if (!user) {
       res.status(404).send({ message: "User Not Found", success: false });
@@ -288,10 +303,6 @@ export const updateUserController = async (req, res, next) => {
     if (designation) user.designation = designation;
     if (employmentType) user.employmentType = employmentType;
 
-
-
-
-
     await user.save();
 
     res.status(200).send({
@@ -299,24 +310,20 @@ export const updateUserController = async (req, res, next) => {
       success: true,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     next(error);
   }
 };
-
-
-
 
 // Update user password controller to update user password After logged In to the system.
 export const updateUserPasswordController = async (req, res, next) => {
   const { userId } = req.params;
   const { password } = req.body;
 
-   // validate
-   if (!password || !userId) {
+  // validate
+  if (!password || !userId) {
     throw new Error("All fields are required");
   }
-
 
   // get req.user from validateToken middleware
   const loggedUser = req.user;
@@ -324,39 +331,40 @@ export const updateUserPasswordController = async (req, res, next) => {
   try {
     // Check If  loggedUser not exists
     if (!loggedUser) {
-      return res.status(401).send({ message: "Unauthorized access", success: false });
+      return res
+        .status(401)
+        .send({ message: "Unauthorized access", success: false });
     }
 
     // const loggedUserEntity = await UserModel.findOne({ _id: loggedUser._id });
 
     // Check If  loggedUserEntity not exists
     if (!loggedUser) {
-      return res.status(401).send({ message: "Unauthorized access", success: false });
+      return res
+        .status(401)
+        .send({ message: "Unauthorized access", success: false });
     }
 
-    if (loggedUser.userType !== "Admin"){
-      if(userId != loggedUser._id){
-        return res.status(401).send({ message: "Unauthorized login", success: false });
+    if (loggedUser.userType !== "Admin") {
+      if (userId != loggedUser._id) {
+        return res
+          .status(401)
+          .send({ message: "Unauthorized login", success: false });
       }
     }
-    
-
-  
 
     const user = await UserModel.findOne({ _id: userId });
 
-
     if (!user) {
-      return res.status(404).send({ message: "User Not Found", success: false });
+      return res
+        .status(404)
+        .send({ message: "User Not Found", success: false });
     }
 
-    
     const isMatch = await user.comparePassword(password);
     if (isMatch) {
       throw new Error("Set updated password. Don't set current password");
     }
-
-    
 
     // Set the hashed password
     user.password = password;
@@ -366,14 +374,103 @@ export const updateUserPasswordController = async (req, res, next) => {
     await user.save();
 
     return res.status(200).send({
-      message: "User Password Updated Successfully", 
+      message: "User Password Updated Successfully",
       success: true,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return next(error);
   }
 };
 
+// Send email for reset-password due to the forgot password
+export const forgetPasswordSendEmailController = async (req, res, next) => {
+  const { email } = req.body;
 
+  if (!email) {
+    return res.status(401).json({ status: 401, message: "Enter Your Email" });
+  }
 
+  try {
+    const userfind = await UserModel.findOne({ email: email });
+
+    if (!userfind) {
+      return res.status(404).json({ status: 404, message: "Invaild  Email" });
+    }
+
+    const expiresIn = 600;
+
+    // token generate for reset password
+    const token = jwt.sign({ _id: userfind._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: expiresIn,
+    });
+
+    const setusertoken = await UserModel.findByIdAndUpdate(
+      { _id: userfind._id },
+      { verifytoken: token },
+      { new: true }
+    );
+    if (setusertoken) {
+      sendForgetPasswordLinkByEmail(userfind, res);
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Verify the id and token in the reset-password link
+export const verifyForgotPasswordLinkController = async (req, res, next) => {
+  const { id, token } = req.params;
+
+  try {
+    const validuser = await UserModel.findOne({ _id: id, verifytoken: token });
+
+    const verifyToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    console.log("verify token", verifyToken);
+
+    if (validuser && verifyToken._id) {
+      res.status(201).json({ status: 201, validuser });
+    } else {
+      res.status(401).json({ status: 401, message: "user not exist" });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// change password
+export const resetPasswordController = async (req, res, next) => {
+  const { id, token } = req.params;
+  const { password } = req.body;
+
+  try {
+    if (!id || !token || !password) {
+      throw new ErrorHandler(400, "Please provide all fields!");
+    }
+
+    const validuser = await UserModel.findOne({ _id: id, verifytoken: token });
+
+    if (!validuser) {
+      return res.status(401).json({ status: 401, message: "user not exist" });
+    }
+
+    const verifyToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    if (!verifyToken) {
+      return res
+        .status(401)
+        .json({ status: 401, message: "Invalid or Expired token" });
+    }
+
+    validuser.password = password;
+    validuser.verifytoken = undefined
+    
+    await validuser.save()
+
+    
+    res.status(201).json({ status: 201, validuser });
+  } catch (error) {
+    next(error);
+  }
+};
