@@ -37,8 +37,10 @@ const Register = () => {
           employmentType,
         },
         {
-          withCredentials: false,
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
         }
       );
       toast.success(data.message);
@@ -52,7 +54,6 @@ const Register = () => {
       setEmploymentType("");
       setIsAuthorized(true);
     } catch (error) {
-      console.log(error);
       toast.error(error.response.data.message);
     }
   };
