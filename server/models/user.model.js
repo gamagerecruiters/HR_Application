@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false, // Do not show the password in the response
+      // select: false, // Do not show the password in the response
     },
     designation: {
       type: String,
@@ -49,6 +49,11 @@ const userSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    company : {
+      type : String,
+      default : "Gamage Recruiters (Pvt) Ltd",
+      required : false
+    },
     // Google Authentication part
     googleId: {
       type: String,
@@ -63,10 +68,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash the password before saving the user to the database
-userSchema.pre("save", async function () {
-  if (!this.isModified) return;
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
+  console.log(this.password)
   this.password = await bcrypt.hash(this.password, salt);
+  next()
 });
 
 
