@@ -12,7 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("");
 
-  const { isAuthorized, setIsAuthorized, user, setUser } = useContext(Context);
+  const { isAuthorized, setIsAuthorized } = useContext(Context);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,8 +25,7 @@ const Login = () => {
           userType,
         },
         {
-          withCredentials: false,
-          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
         }
       );
       toast.success(data.message);

@@ -47,8 +47,9 @@ dbConnection();
 // middlenames
 app.use(
   cors({
-    origin: "*",
-    allowedHeaders: ["*"], //Enabled Cross-Origin Resource Sharing (CORS) with all origins and allowed all headers.
+    origin: "http://localhost:5173", //Allowed Cross-Origin Resource Sharing (CORS) with the specified origin
+    allowedHeaders: ["Content-Type", "Authorization"], //Enabled Cross-Origin Resource Sharing (CORS) with all origins and allowed all headers.
+    credentials: true,
   })
 );
 app.use(xss());

@@ -1,4 +1,5 @@
 import express from "express";
+import { isAuthorized } from "../middlewares/auth.js";
 import {
   createJobController,
   deleteJobController,
@@ -6,9 +7,7 @@ import {
   jobStatsController,
   updateJobController,
 } from "../controllers/jobsController.js"; //* Import the createJobController and getJobsController from the controllers folder
-import { sendToken } from "../middlewares/jwtValidation.js";
 import reportGenerateController from "../controllers/reportGenerateController.js";
-import { isAuthorized } from "../middlewares/auth.js";
 
 const router = express.Router();
 

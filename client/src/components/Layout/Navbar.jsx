@@ -14,7 +14,9 @@ const Navbar = () => {
     try {
       const response = await axios.get(
         "http://localhost:8800/api-v1/auth/logout",
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
       toast.success(response.data.message);
       setIsAuthorized(false);
