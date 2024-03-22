@@ -33,7 +33,7 @@ const HeroSection = () => {
       <div className="container">
         <div className="title">
           <h1>Find a job that suits</h1>
-          <h1>Your interest and skills</h1>
+          <h1>Your interests and skills</h1>
           <p>
             Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis
             quia rem neque, ad inventore at atque explicabo unde fugit, quisquam
