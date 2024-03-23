@@ -15,27 +15,30 @@ import JobDetails from "./components/Job/JobDetails";
 import NotFound from "./components/NotFound/NotFound";
 import Application from "./components/Application/Application";
 import MyApplications from "./components/Application/MyApplications";
+import ForgotPassword from "./components/User/ForgotPassword";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import PasswordReset from "./components/User/PasswordReset";
 
 const App = () => {
   const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:8800/api-v1/auth/getuser",
-          {
-            withCredentials: true,
-          }
-        );
-        setUser(response.data.user);
-        setIsAuthorized(true);
-      } catch (error) {
-        setIsAuthorized(false);
-      }
-    };
-    fetchUser();
-  }, [isAuthorized]);
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         "http://localhost:8800/api-v1/auth/getuser",
+  //         {
+  //           withCredentials: true,
+  //         }
+  //       );
+  //       console.log(response)
+  //       setUser(response.data.user);
+  //       setIsAuthorized(true);
+  //     } catch (error) {
+  //       setIsAuthorized(false);
+  //     }
+  //   };
+  //   fetchUser();
+  // }, [isAuthorized]);
 
   return (
     <Router>
@@ -44,6 +47,8 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Home />} />
+        <Route path="/password-reset" element={<PasswordReset />} />
+        <Route path="/forgotpassword/:id/:token" element={<ForgotPassword />} />
         <Route path="/job/getAll" element={<Jobs />} />
         <Route path="/job/:id" element={<JobDetails />} />
         <Route path="/application/:id" element={<Application />} />
