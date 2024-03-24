@@ -37,6 +37,7 @@ const PostJob = () => {
         }
       );
       toast.success("Job posted successfully", res.data.message);
+      navigateTo("/");
     } catch (error) {
       toast.error(error.response.data.message);
     }
@@ -61,7 +62,8 @@ const PostJob = () => {
               />
             </div>
             <div className="wrapper">
-              <input
+              <textarea
+                rows="2"
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -100,14 +102,6 @@ const PostJob = () => {
                 <option value="Customer Support">Customer Support</option>
                 <option value="Other">Other</option>
               </select>
-              <select
-                value={expired}
-                onChange={(e) => setExpired(e.target.value)}
-              >
-                <option value="">Select Job Expiry</option>
-                <option value="true">Expired</option>
-                <option value="false">Not Expired</option>
-              </select>
             </div>
             <div className="wrapper">
               <select
@@ -122,14 +116,24 @@ const PostJob = () => {
                 <option value="Remote">Remote</option>
                 <option value="Other">Other</option>
               </select>
+              <select
+                value={expired}
+                onChange={(e) => setExpired(e.target.value)}
+              >
+                <option value={""}>Select Job Expiry</option>
+                <option value={true}>Expired</option>
+                <option value={false}>Not Expired</option>
+              </select>
             </div>
             <div className="wrapper">
               <textarea
+                rows="5"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Description"
-              ></textarea>
+              />
             </div>
+            <button type="submit">Create Job</button>
           </form>
         </div>
       </div>

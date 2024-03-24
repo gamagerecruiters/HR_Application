@@ -4,6 +4,7 @@ import {
   createJobController,
   deleteJobController,
   getJobsController,
+  getMyJobs,
   getSingleJob,
   jobStatsController,
   updateJobController,
@@ -19,11 +20,14 @@ router.post("/create-job", isAuthorized, createJobController);
 // GET JOBS || GET /api-v1/job/get-job
 router.get("/getAll", getJobsController);
 
+// GET MY JOBS || GET /api-v1/job/my-jobs
+router.get("/my-jobs", isAuthorized, getMyJobs);
+
 // GET SINGLE JOB || GET /api-v1/job/:id
 router.get("/:id", isAuthorized, getSingleJob);
 
-// UPDATE JOB || PUT || PATCH /api-v1/job/update-job/:id
-router.patch("/update-job/:id", isAuthorized, updateJobController);
+// UPDATE JOB || PUT /api-v1/job/update-job/:id
+router.put("/update-job/:id", isAuthorized, updateJobController);
 
 // DELETE JOB || DELETE /api-v1/job/delete-job/:id
 router.delete("/delete-job/:id", isAuthorized, deleteJobController);

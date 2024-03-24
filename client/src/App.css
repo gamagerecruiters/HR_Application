@@ -991,17 +991,21 @@ p {
 }
 .myJobs .container .banner {
   width: 100%;
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   flex-direction: column;
 }
 .myJobs .container .banner .card {
+  background: transparent;
+  border: none;
   width: 100%;
   display: flex;
   gap: 20px;
   border-bottom: 1px solid #18191c;
   padding: 10px 0;
+  /* padding-left: 15px; */
 }
 .myJobs .container .banner .card .content {
   flex: 3;
@@ -1024,6 +1028,7 @@ p {
 .myJobs .container .banner .card .content input:enabled,
 .myJobs .container .banner .card .content select:enabled {
   border-bottom: 1px solid gainsboro;
+  outline: none;
 }
 .myJobs .container .banner .card .content input:disabled,
 .myJobs .container .banner .card .content select:disabled {
@@ -1073,7 +1078,7 @@ p {
 .myJobs .container .banner .card .button_wrapper {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 20px;
   align-items: center;
   justify-content: center;
