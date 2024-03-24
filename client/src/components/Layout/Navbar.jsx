@@ -1,8 +1,8 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Context } from "../../main";
-import { GiHamburgerMenu } from "react-icons/gi";
 import { useContext, useState } from "react";
+import { GiHamburgerMenu } from "react-icons/gi";
 import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
@@ -22,8 +22,7 @@ const Navbar = () => {
       setIsAuthorized(false);
       navigateTo("/login");
     } catch (error) {
-      toast.error(error.response.data.message);
-      setIsAuthorized(true);
+      toast.error(error.response.data.message), setIsAuthorized(true);
     }
   };
 
@@ -36,32 +35,37 @@ const Navbar = () => {
           </div>
           <ul className={!show ? "menu" : "show-menu menu"}>
             <li>
-              <Link to={"/"} onClick={() => setShow(false)} />
-              HOME
+              <Link to={"/"} onClick={() => setShow(false)}>
+                HOME
+              </Link>
             </li>
             <li>
-              <Link to={"/job/getAll"} onClick={() => setShow(false)} />
-              ALL JOBS
+              <Link to={"/job/getAll"} onClick={() => setShow(false)}>
+                ALL JOBS
+              </Link>
             </li>
             <li>
-              <Link to={"/applications/me"} onClick={() => setShow(false)} />
-              {user && user.userType === "Admin"
-                ? "APPLICANT'S APPLICATIONS"
-                : "MY APPLICATIONS"}
+              <Link to={"/applications/me"} onClick={() => setShow(false)}>
+                {user && user.userType === "Admin"
+                  ? "APPLICANT'S APPLICATIONS"
+                  : "MY APPLICATIONS"}
+              </Link>
             </li>
             {user && user.userType === "Admin" ? (
-              <div>
+              <>
                 <li>
-                  <Link to={"/job/post"} onClick={() => setShow(false)} />
-                  POST NEW JOB
+                  <Link to={"/job/post"} onClick={() => setShow(false)}>
+                    POST NEW JOB
+                  </Link>
                 </li>
                 <li>
-                  <Link to={"/job/me"} onClick={() => setShow(false)} />
-                  VIEW YOUR JOBS
+                  <Link to={"/job/me"} onClick={() => setShow(false)}>
+                    VIEW YOUR JOBS
+                  </Link>
                 </li>
-              </div>
+              </>
             ) : (
-              <div></div>
+              <></>
             )}
             <button onClick={handleLogout}>LOGOUT</button>
           </ul>

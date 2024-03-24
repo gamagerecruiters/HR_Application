@@ -459,6 +459,7 @@ p {
   background: #f1f3f6;
 }
 .categories .banner .card:hover {
+  cursor: pointer;
   transition: all 0.3s;
   box-shadow: 2px 10px 10px -1px rgba(0, 0, 0, 0.17);
   -webkit-box-shadow: 2px 10px 10px -1px rgba(0, 0, 0, 0.17);
@@ -612,8 +613,8 @@ p {
 .jobs .container .banner .card {
   background: #fff;
   text-decoration: none;
-  width: 320px;
-  height: 220px;
+  width: auto;
+  height: auto;
   padding: 20px 20px;
   display: flex;
   flex-direction: column;
@@ -1201,7 +1202,7 @@ nav .menu li a {
   position: relative;
 }
 nav .menu li a:hover {
-  color: #3b82f6;
+  color: #18191c;
   transition: all 0.3s;
 }
 nav .menu li a::before {

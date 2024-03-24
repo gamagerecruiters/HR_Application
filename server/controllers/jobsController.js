@@ -255,3 +255,19 @@ export const jobStatsController = async (req, res) => {
     next(error);
   }
 };
+
+export const getSingleJob = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const job = await ApplicationModel.findById(id);
+    if (!job) {
+      return next(new ErrorHandler(400, "Job not found!"));
+    }
+    res.status(200).json({
+      success: true,
+      job,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, "Invalid ID/ CastError!"));
+  }
+});
