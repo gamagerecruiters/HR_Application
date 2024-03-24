@@ -13,32 +13,31 @@ import Navbar from "./components/Layout/Navbar";
 import Register from "./components/Auth/Register";
 import JobDetails from "./components/Job/JobDetails";
 import NotFound from "./components/NotFound/NotFound";
+import PasswordReset from "./components/User/PasswordReset";
+import ForgotPassword from "./components/User/ForgotPassword";
 import Application from "./components/Application/Application";
 import MyApplications from "./components/Application/MyApplications";
-import ForgotPassword from "./components/User/ForgotPassword";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import PasswordReset from "./components/User/PasswordReset";
 
 const App = () => {
   const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         "http://localhost:8800/api-v1/auth/getuser",
-  //         {
-  //           withCredentials: true,
-  //         }
-  //       );
-  //       console.log(response)
-  //       setUser(response.data.user);
-  //       setIsAuthorized(true);
-  //     } catch (error) {
-  //       setIsAuthorized(false);
-  //     }
-  //   };
-  //   fetchUser();
-  // }, [isAuthorized]);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8800/api-v1/auth/getuser",
+          {
+            withCredentials: true,
+          }
+        );
+        setUser(response.data.user);
+        setIsAuthorized(true);
+      } catch (error) {
+        setIsAuthorized(false);
+      }
+    };
+    fetchUser();
+  }, [isAuthorized]);
 
   return (
     <Router>
