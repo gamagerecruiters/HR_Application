@@ -199,7 +199,7 @@ p {
 }
 
 .footerShow {
-  background: #18191c;
+  background: #2563eb;
   display: flex;
   justify-content: space-between;
   padding: 25px 120px;
@@ -217,7 +217,6 @@ p {
   color: #f1f3f6;
 }
 .footerShow div a:hover {
-  color: #3b82f6;
   transform: scale(1.2);
   transition: all 0.3s;
 }
@@ -285,6 +284,7 @@ p {
   padding: 50px 0;
 }
 .heroSection .details .card {
+  cursor: pointer;
   display: flex;
   gap: 20px;
   align-items: center;
@@ -459,6 +459,7 @@ p {
   background: #f1f3f6;
 }
 .categories .banner .card:hover {
+  cursor: pointer;
   transition: all 0.3s;
   box-shadow: 2px 10px 10px -1px rgba(0, 0, 0, 0.17);
   -webkit-box-shadow: 2px 10px 10px -1px rgba(0, 0, 0, 0.17);
@@ -612,8 +613,8 @@ p {
 .jobs .container .banner .card {
   background: #fff;
   text-decoration: none;
-  width: 320px;
-  height: 220px;
+  width: auto;
+  height: auto;
   padding: 20px 20px;
   display: flex;
   flex-direction: column;
@@ -1152,7 +1153,7 @@ p {
   }
 }
 nav {
-  background: #18191c;
+  background: #2563eb;
   padding: 0 20px;
 }
 nav .container {
@@ -1174,6 +1175,7 @@ nav .menu {
   display: flex;
   gap: 25px;
   align-items: center;
+  color: #f1f3f6;
 }
 nav .menu button {
   height: fit-content;
@@ -1185,8 +1187,8 @@ nav .menu button {
   font-weight: 300;
 }
 nav .menu button:hover {
-  color: #f1f3f6;
-  background: #1c4587;
+  color: #1c4587;
+  background: #fff;
   transition: all 0.3s;
   cursor: pointer;
   font-weight: 500;
@@ -1200,7 +1202,7 @@ nav .menu li a {
   position: relative;
 }
 nav .menu li a:hover {
-  color: #3b82f6;
+  color: #18191c;
   transition: all 0.3s;
 }
 nav .menu li a::before {

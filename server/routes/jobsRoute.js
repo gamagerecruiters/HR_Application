@@ -4,6 +4,7 @@ import {
   createJobController,
   deleteJobController,
   getJobsController,
+  getSingleJob,
   jobStatsController,
   updateJobController,
 } from "../controllers/jobsController.js"; //* Import the createJobController and getJobsController from the controllers folder
@@ -17,6 +18,9 @@ router.post("/create-job", isAuthorized, createJobController);
 
 // GET JOBS || GET /api-v1/job/get-job
 router.get("/getAll", getJobsController);
+
+// GET SINGLE JOB || GET /api-v1/job/:id
+router.get("/:id", isAuthorized, getSingleJob);
 
 // UPDATE JOB || PUT || PATCH /api-v1/job/update-job/:id
 router.patch("/update-job/:id", isAuthorized, updateJobController);
