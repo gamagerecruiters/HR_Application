@@ -93,6 +93,7 @@ const Login = () => {
             <button onClick={handleLogin} type="login">
               Login
             </button>
+            <Link to="/password-reset">Forget Password</Link>
             <Link to={"/register"}>Register Now</Link>
           </form>
         </div>

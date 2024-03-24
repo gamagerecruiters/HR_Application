@@ -9,13 +9,13 @@ const transporter = nodemailer.createTransport({
     },
   });
 
-export const sendForgetPasswordLinkByEmail = async (user, res) =>  {
+export const sendForgetPasswordLinkByEmail = async (user, setusertoken ,res) =>  {
     const mailOptions = {
         from: process.env.EMAIL,
         to: user.email,
         subject: "Sending Email For password Reset",
         text: `This Link Valid For 10 MINUTES     
-        http://localhost:3001/forgotpassword/${user.id}/${user.verifytoken}`,
+        http://localhost:5173/forgotpassword/${user.id}/${setusertoken.verifytoken}`,
       };
     
       transporter.sendMail(mailOptions, (error, info) => {

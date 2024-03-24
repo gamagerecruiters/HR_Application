@@ -411,7 +411,7 @@ export const forgetPasswordSendEmailController = async (req, res, next) => {
       { new: true }
     );
     if (setusertoken) {
-      sendForgetPasswordLinkByEmail(userfind, res);
+      sendForgetPasswordLinkByEmail(userfind, setusertoken, res);
     }
   } catch (error) {
     next(error);
@@ -430,9 +430,9 @@ export const verifyForgotPasswordLinkController = async (req, res, next) => {
     console.log("verify token", verifyToken);
 
     if (validuser && verifyToken._id) {
-      res.status(201).json({ status: 201, validuser });
+      res.status(201).send({ status: 201, validuser });
     } else {
-      res.status(401).json({ status: 401, message: "user not exist" });
+      res.status(401).send({ status: 401, message: "user not exist" });
     }
   } catch (error) {
     next(error);
