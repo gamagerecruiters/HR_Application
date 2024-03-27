@@ -6,6 +6,7 @@ import {
   logoutController,
   registerController,
 } from "../controllers/authController.js"; //* Import the loginController and registerController from the controllers folder
+import { forgetPasswordSendEmailController, resetPasswordController, verifyForgotPasswordLinkController } from "../controllers/userController.js";
 
 const authRoute = express.Router();
 
@@ -20,5 +21,11 @@ authRoute.get("/logout", isAuthorized, logoutController); // Use authRoute inste
 
 // GET || GET USER /api-v1/auth/getUser
 authRoute.get("/getUser", isAuthorized, getUser); // Use authRoute instead of router
+
+authRoute.get("/forgotpassword/:id/:token",verifyForgotPasswordLinkController);
+
+authRoute.post("/sendPasswordLink/", forgetPasswordSendEmailController)
+
+authRoute.post("/reset-password/:id/:token", resetPasswordController )
 
 export default authRoute;

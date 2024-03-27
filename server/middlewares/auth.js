@@ -14,5 +14,26 @@ export const isAuthorized = catchAsyncError(async (req, res, next) => {
 
   req.user = await UserModel.findById(decoded._id);
 
+  if(req.user){
+    req.isAdmin = req.user.userType === "Admin" ? true : false
+  }
+
   next();
 });
+
+
+// export const isAdmin = catchAsyncError(async (req, res, next) => {
+//   const authorizedUser = req.user
+
+//   if (!authorizedUser) {
+//     return next(new ErrorHandler(400, "User not authorized!"));
+//   }
+
+//   if(authorizedUser.userType != "Admin"){
+//     return next(new ErrorHandler(401, "User not Authorized"))
+//   }
+
+//   req.admin = true
+
+//   next();
+// });

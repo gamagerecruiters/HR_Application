@@ -10,7 +10,7 @@ const PasswordReset = () => {
         try {
             // Make a POST request to the backend route
             const response = await axios.post(
-                "http://localhost:8800/api-v1/user/sendPasswordLink",
+                "http://localhost:8800/api-v1/auth/sendPasswordLink",
                 { email }
             );
 
