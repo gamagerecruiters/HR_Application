@@ -1,5 +1,6 @@
 dotenv.config();
 import dotenv from "dotenv";
+import { showUserOutput } from "../helpers/extractUserDetails.js";
 
 export const sendToken = (user, statusCode, res, message) => {
   const token = user.getJWTToken();
@@ -9,9 +10,13 @@ export const sendToken = (user, statusCode, res, message) => {
     ),
     httpOnly: true,
   };
+
+  // Extract needed properties from user
+  const userRes = showUserOutput(user)
+
   res.status(statusCode).cookie("token", token, options).json({
     success: true,
-    user,
+    user : userRes,
     message,
     token,
   });

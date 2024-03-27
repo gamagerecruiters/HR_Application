@@ -5,7 +5,7 @@ import axios from "axios";
 const ForgotPassword = () => {
   const { id, token } = useParams();
 
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
 
@@ -13,7 +13,7 @@ const ForgotPassword = () => {
 
   const userValid = async () => {
     try {
-      const response = await axios.get(`http://localhost:8800/api-v1/user/forgotpassword/${id}/${token}`, {
+      const response = await axios.get(`http://localhost:8800/api-v1/auth/forgotpassword/${id}/${token}`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -25,10 +25,11 @@ const ForgotPassword = () => {
       if (response.status === 201) {
         console.log("user valid", response);
       } else {
+        navigate("*");
         console.log("Invalid", response)
-        history("*");
       }
     } catch (error) {
+      navigate("*");
       // Handle errors
       console.log("Error:", error);
     }
@@ -38,7 +39,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `http://localhost:8800/api-v1/user/reset-password/${id}/${token}`,
+        `http://localhost:8800/api-v1/auth/reset-password/${id}/${token}`,
         {
           password,
         },
@@ -62,30 +63,7 @@ const ForgotPassword = () => {
     }
   };
 
-  //   const updatePassword = async (id, token, password) => {
-  //     try {
-  //         const response = await axios.post(`/${id}/${token}`, {
-  //             password
-  //         }, {
-  //             headers: {
-  //                 "Content-Type": "application/json"
-  //             }
-  //         });
-
-  //         if (response.status === 201) {
-  //             setPassword("");
-  //             setMessage(true);
-  //         } else {
-  //             toast.error("! Token Expired generate new LInk", {
-  //                 position: "top-center"
-  //             });
-  //         }
-  //     } catch (error) {
-  //         // Handle errors
-  //         console.error("Error:", error);
-  //     }
-  // }
-
+  
   useEffect(() => {
     userValid()
     setTimeout(() => {
