@@ -47,9 +47,12 @@ const MyApplications = () => {
   const deleteApplication = async (id) => {
     try {
       axios
-        .delete(`http://localhost:8800/api-v1/job/delete-job/${id}`, {
-          withCredentials: true,
-        })
+        .delete(
+          `http://localhost:8800/api-v1/application/user-delete-application/${id}`,
+          {
+            withCredentials: true,
+          }
+        )
         .then((res) => {
           toast.success(res.data.message);
           setApplications((prevApplication) =>
@@ -188,7 +191,7 @@ const UserCard = ({ element, deleteApplication, openModal, applications }) => {
   );
 };
 
-const AdminCard = ({ element, deleteApplication, openModal, applications }) => {
+const AdminCard = ({ element, openModal, applications }) => {
   return (
     <>
       <div className="job_seeker_card">
