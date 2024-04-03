@@ -3,6 +3,7 @@ import UserModel from "../models/user.model.js";
 import ErrorHandler from "../middlewares/error.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { sendToken } from "../middlewares/jwtValidation.js";
+import {showUserOutput} from "../helpers/extractUserDetails.js"
 
 export const registerController = catchAsyncError(async (req, res, next) => {
   const {
@@ -73,7 +74,6 @@ export const loginController = catchAsyncError(async (req, res, next) => {
 
     // Check if the user exists
     const existingUser = await UserModel.findOne({ email }).select("+password");
-    console.log(existingUser, password)
     if (!existingUser) {
       return next(new ErrorHandler(400, "Invalid email or password!"));
     }
@@ -93,6 +93,8 @@ export const loginController = catchAsyncError(async (req, res, next) => {
     if (existingUser.status == "Inactive"){
       return next(new ErrorHandler(400, "User is inactive "));
     }
+
+
 
     sendToken(existingUser, 200, res, "User logged in successfully!"); // Send the token to the user
   } catch (error) {

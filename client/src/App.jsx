@@ -18,6 +18,9 @@ import ForgotPassword from "./components/User/ForgotPassword";
 import Application from "./components/Application/Application";
 import MyApplications from "./components/Application/MyApplications";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import UsersComponent from "./components/User/UsersComponent";
+import User from "./components/User/User";
+import UserProfile from "./components/User/UserProfile";
 
 const App = () => {
   const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
@@ -55,6 +58,14 @@ const App = () => {
         <Route path="/job/post" element={<PostJob />} />
         <Route path="/job/me" element={<MyJobs />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/error" element={<NotFound />} />
+
+        {/* --------------- */}
+
+        <Route path="/user" element={<User />} />
+        <Route path="/user/:id" element={<UserProfile />} />
+        <Route path="/userComponent" element={<UsersComponent />} />
+
       </Routes>
       <Footer />
       <Toaster />

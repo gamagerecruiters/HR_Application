@@ -3,23 +3,36 @@ import ErrorHandler from "../middlewares/error.js";
 import mongoose from "mongoose"; // Import Mongoose for ObjectId validation
 import { sendForgetPasswordLinkByEmail } from "../utils/mailer.js";
 import jwt from "jsonwebtoken";
+import { showUserOutput } from "../helpers/extractUserDetails.js";
+import {
+  isAuthorizedAdminAccess,
+  isAuthorizedUserAccess,
+} from "../services/authService.js";
 
 // Delete user
 export const deleteUserController = async (req, res, next) => {
   const { userId } = req.params; // Read the userId parameter
   try {
+    // Verify the Authorized Admin Access
+    if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized Access", success: false });
+    }
+
+
     // Find the user by id and delete that user from database
     const deletedUser = await UserModel.findByIdAndDelete({ _id: userId });
 
     if (!deletedUser) {
       return res
         .status(404)
-        .send({ message: "User not found", success: false });
+        .json({ message: "User not found", success: false });
     }
 
     res
       .status(200)
-      .send({ message: "User deleted successfully", success: true });
+      .json({ message: "User deleted successfully", success: true });
   } catch (error) {
     next(error);
   }
@@ -28,29 +41,28 @@ export const deleteUserController = async (req, res, next) => {
 // Retrieve all users
 export const getAllUsersController = async (req, res, next) => {
   try {
+    // Verify the Authorized Admin Access
+    if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized Access", success: false });
+    }
+
     // Find all users
     const allUsers = await UserModel.find();
 
-    if (!allUsers) {
+    if (!allUsers || allUsers.length === 0) {
       return res
         .status(404)
-        .send({ message: "Users not found", success: false });
+        .json({ message: "Users not found", success: false });
     }
 
     // Filter the required fields for the response. To prevent sending the password field to the response
     const usersOutput = allUsers.map((user) => {
-      return {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-        designation: user.designation,
-        employmentType: user.employmentType,
-      };
+      return showUserOutput(user);
     });
 
-    res.status(200).send({
+    res.status(200).json({
       message: "Users fetched successfully",
       success: true,
       users: usersOutput,
@@ -64,33 +76,46 @@ export const getAllUsersController = async (req, res, next) => {
 export const getUserController = async (req, res, next) => {
   const { userId } = req.params;
   try {
+    // Verify the user access
+    if (!isAuthorizedUserAccess(req.user)) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized Access", success: false });
+    }
+
     // validate
     if (!userId) {
       throw new ErrorHandler(400, "Please provide all fields!");
     }
+
+    // Check if userId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid parameters", success: false });
+    }
+
+    // if(!(isAuthorizedAdminAccess(req.user, req.isAdmin)) && (req.user._id !== userId)){
+    //   throw new ErrorHandler(401, "Unauthorized Access");
+    // }
+
+    
     // Find user by Id
     const user = await UserModel.find({ _id: userId });
 
-    if (!user) {
+    // If user not exist 
+    if (!user || user.length === 0) {
       return res
         .status(404)
-        .send({ message: "User not found", success: false });
+        .json({ message: "User not found", success: false });
     }
 
     // Filter the required fields for the response. To prevent sending the password field to the response
     const userOutput = user.map((user) => {
-      return {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-        designation: user.designation,
-        employmentType: user.employmentType,
-      };
+      return showUserOutput(user);
     });
 
-    res.status(200).send({
+    res.status(200).json({
       message: "User fetched successfully",
       success: true,
       user: userOutput,
@@ -118,23 +143,15 @@ export const getFilteredUserByDesignationController = async (
     if (!users || users.length === 0) {
       return res
         .status(404)
-        .send({ message: "User not found", success: false });
+        .json({ message: "User not found", success: false });
     }
 
     // Filter the required fields for the response. To prevent sending the password field to the response
     const userOutput = users.map((user) => {
-      return {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-        designation: user.designation,
-        employmentType: user.employmentType,
-      };
+      return showUserOutput(user);
     });
 
-    res.status(200).send({
+    res.status(200).json({
       message: "User filtered successfully based on Designation",
       success: true,
       userList: userOutput,
@@ -158,23 +175,15 @@ export const getFilteredUserByUserTypeController = async (req, res, next) => {
     if (!users || users.length === 0) {
       return res
         .status(404)
-        .send({ message: "User not found", success: false });
+        .json({ message: "User not found", success: false });
     }
 
     // Filter the required fields for the response. To prevent sending the password field to the response
     const userOutput = users.map((user) => {
-      return {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-        designation: user.designation,
-        employmentType: user.employmentType,
-      };
+      return showUserOutput(user);
     });
 
-    res.status(200).send({
+    res.status(200).json({
       message: `User filtered successfully based on User Type`,
       success: true,
       userList: userOutput,
@@ -202,23 +211,15 @@ export const getFilteredUserByEmploymentTypeController = async (
     if (!users || users.length === 0) {
       return res
         .status(404)
-        .send({ message: "User not found", success: false });
+        .json({ message: "User not found", success: false });
     }
 
     // Filter the required fields for the response. To prevent sending the password field to the response
     const userOutput = users.map((user) => {
-      return {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-        designation: user.designation,
-        employmentType: user.employmentType,
-      };
+      return showUserOutput(user);
     });
 
-    res.status(200).send({
+    res.status(200).json({
       message: "User filtered successfully based on Employment Type",
       success: true,
       userList: userOutput,
@@ -249,23 +250,15 @@ export const getFilteredUserByEmploymentTypeAndDesignationController = async (
     if (!users || users.length === 0) {
       return res
         .status(404)
-        .send({ message: "User not found", success: false });
+        .json({ message: "User not found", success: false });
     }
 
     // Filter the required fields for the response. To prevent sending the password field to the response
     const userOutput = users.map((user) => {
-      return {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-        designation: user.designation,
-        employmentType: user.employmentType,
-      };
+      return showUserOutput(user);
     });
 
-    res.status(200).send({
+    res.status(200).json({
       message:
         "User filtered successfully based on Employment Type and Designation",
       success: true,
@@ -281,17 +274,33 @@ export const updateUserController = async (req, res, next) => {
   const { firstName, lastName, email, phone, designation, employmentType } =
     req.body;
   try {
+    // Verify the user access
+    if (!isAuthorizedUserAccess(req.user)) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized Access", success: false });
+    }
+
+    // validate
+    if (!userId) {
+      throw new ErrorHandler(400, "Please provide all fields!");
+    }
+
     // Check if userId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res
         .status(400)
-        .json({ message: "Invalid userId", success: false });
+        .json({ message: "Invalid parameters", success: false });
+    }
+
+    if(!(isAuthorizedAdminAccess(req.user, req.isAdmin)) && (req.user._id !== userId)){
+      throw new ErrorHandler(401, "Unauthorized Access");
     }
 
     const user = await UserModel.findOne({ _id: userId });
 
     if (!user) {
-      res.status(404).send({ message: "User Not Found", success: false });
+      res.status(404).json({ message: "User Not Found", success: false });
     }
 
     // It checks the properties of request body object has value and If it has value then only assign the new value to the user in the database
@@ -305,7 +314,7 @@ export const updateUserController = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).send({
+    res.status(200).json({
       message: "User Updated Successfully",
       success: true,
     });
@@ -333,7 +342,7 @@ export const updateUserPasswordController = async (req, res, next) => {
     if (!loggedUser) {
       return res
         .status(401)
-        .send({ message: "Unauthorized access", success: false });
+        .json({ message: "Unauthorized access", success: false });
     }
 
     // const loggedUserEntity = await UserModel.findOne({ _id: loggedUser._id });
@@ -342,14 +351,14 @@ export const updateUserPasswordController = async (req, res, next) => {
     if (!loggedUser) {
       return res
         .status(401)
-        .send({ message: "Unauthorized access", success: false });
+        .json({ message: "Unauthorized access", success: false });
     }
 
     if (loggedUser.userType !== "Admin") {
       if (userId != loggedUser._id) {
         return res
           .status(401)
-          .send({ message: "Unauthorized login", success: false });
+          .json({ message: "Unauthorized login", success: false });
       }
     }
 
@@ -358,7 +367,7 @@ export const updateUserPasswordController = async (req, res, next) => {
     if (!user) {
       return res
         .status(404)
-        .send({ message: "User Not Found", success: false });
+        .json({ message: "User Not Found", success: false });
     }
 
     const isMatch = await user.comparePassword(password);
@@ -373,7 +382,7 @@ export const updateUserPasswordController = async (req, res, next) => {
 
     await user.save();
 
-    return res.status(200).send({
+    return res.status(200).json({
       message: "User Password Updated Successfully",
       success: true,
     });
@@ -430,9 +439,9 @@ export const verifyForgotPasswordLinkController = async (req, res, next) => {
     console.log("verify token", verifyToken);
 
     if (validuser && verifyToken._id) {
-      res.status(201).send({ status: 201, validuser });
+      res.status(201).json({ status: 201, validuser });
     } else {
-      res.status(401).send({ status: 401, message: "user not exist" });
+      res.status(401).json({ status: 401, message: "user not exist" });
     }
   } catch (error) {
     next(error);
@@ -464,11 +473,10 @@ export const resetPasswordController = async (req, res, next) => {
     }
 
     validuser.password = password;
-    validuser.verifytoken = undefined
-    
-    await validuser.save()
+    validuser.verifytoken = undefined;
 
-    
+    await validuser.save();
+
     res.status(201).json({ status: 201, validuser });
   } catch (error) {
     next(error);

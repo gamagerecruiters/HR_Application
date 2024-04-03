@@ -40,6 +40,11 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
+              <Link to={"/user"} onClick={() => setShow(false)}>
+                {"user".toUpperCase()}
+              </Link>
+            </li>
+            <li>
               <Link to={"/job/getAll"} onClick={() => setShow(false)}>
                 ALL JOBS
               </Link>
