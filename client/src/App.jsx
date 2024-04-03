@@ -19,6 +19,8 @@ import Application from "./components/Application/Application";
 import MyApplications from "./components/Application/MyApplications";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UsersComponent from "./components/User/UsersComponent";
+import User from "./components/User/User";
+import UserProfile from "./components/User/UserProfile";
 
 const App = () => {
   const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
@@ -47,7 +49,6 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Home />} />
-        <Route path="/userComponent" element={<UsersComponent />} />
         <Route path="/password-reset" element={<PasswordReset />} />
         <Route path="/forgotpassword/:id/:token" element={<ForgotPassword />} />
         <Route path="/job/getAll" element={<Jobs />} />
@@ -58,6 +59,12 @@ const App = () => {
         <Route path="/job/me" element={<MyJobs />} />
         <Route path="*" element={<NotFound />} />
         <Route path="/error" element={<NotFound />} />
+
+        {/* --------------- */}
+
+        <Route path="/user" element={<User />} />
+        <Route path="/user/:id" element={<UserProfile />} />
+        <Route path="/userComponent" element={<UsersComponent />} />
 
       </Routes>
       <Footer />

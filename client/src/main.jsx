@@ -1,6 +1,7 @@
 import App from "./App.jsx";
 import ReactDOM from "react-dom/client";
 import React, { createContext, useState } from "react";
+import "./index.css"
 
 export const Context = createContext({ isAuthorized: false });
 

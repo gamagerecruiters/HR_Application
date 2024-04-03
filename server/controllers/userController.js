@@ -95,9 +95,9 @@ export const getUserController = async (req, res, next) => {
         .json({ message: "Invalid parameters", success: false });
     }
 
-    if(!(isAuthorizedAdminAccess(req.user, req.isAdmin)) && (req.user._id !== userId)){
-      throw new ErrorHandler(401, "Unauthorized Access");
-    }
+    // if(!(isAuthorizedAdminAccess(req.user, req.isAdmin)) && (req.user._id !== userId)){
+    //   throw new ErrorHandler(401, "Unauthorized Access");
+    // }
 
     
     // Find user by Id
