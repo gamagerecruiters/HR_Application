@@ -10,37 +10,47 @@ import {
   getFilteredUserByEmploymentTypeAndDesignationController,
   getFilteredUserByEmploymentTypeController,
   getFilteredUserByUserTypeController,
-  updateUserPasswordController,
+  updateUserStatusController, 
+  generateUserReport
 } from "../controllers/userController.js"; //* Import the needed user controller functions from the controllers folder
 
 
-const router = express.Router();
+const userRouter = express.Router();
 
 //Routes
-// GET USERS || GET /api-v1/user
-router.get("/get-all-users", isAuthorized ,getAllUsersController);  // Access - Admin
+// GET all users || GET /api-v1/get-all-users
+userRouter.get("/get-all-users", isAuthorized ,getAllUsersController);  // Access - Admin
 
-router.get("/get-user/:userId", isAuthorized ,getUserController); // Access - User , Admin
+// GET users by userId || GET /api-v1/get-user/:userId
+userRouter.get("/get-user/:userId", isAuthorized ,getUserController); // Access - User , Admin
 
-router.get("/get-user-by-userType", isAuthorized ,getFilteredUserByUserTypeController);
+// GET users by userType || GET /api-v1/get-user-by-userType    //  Query Parameters Used
+userRouter.get("/get-user-by-userType", isAuthorized ,getFilteredUserByUserTypeController);
 
-router.get("/get-user-by-designation", isAuthorized ,getFilteredUserByDesignationController);
+// GET all user by designation || GET /api-v1/get-user-by-designation  //  Query Parameters Used
+userRouter.get("/get-user-by-designation", isAuthorized ,getFilteredUserByDesignationController);
 
-router.get("/get-user-by-employmentType", isAuthorized ,getFilteredUserByEmploymentTypeController);
+// GET all user by employmentType || GET /api-v1/get-user-by-employmentType  //  Query Parameters Used
+userRouter.get("/get-user-by-employmentType", isAuthorized ,getFilteredUserByEmploymentTypeController);
 
-router.get("/get-user-by-employmentType-designation", isAuthorized ,getFilteredUserByEmploymentTypeAndDesignationController)
+// GET all user by employmentType and designation || GET /api-v1/get-user-by-employmentType-designation  //  Query Parameters Used
+userRouter.get("/get-user-by-employmentType-designation", isAuthorized ,getFilteredUserByEmploymentTypeAndDesignationController)
+
+// GET generate user report || GET /api-v1/generate-report
+userRouter.get("/generate-user-report", isAuthorized ,generateUserReport)
+
+// UPDATE USERS || PATCH /api-v1/update-user/:userId
+userRouter.patch("/update-user/:userId", isAuthorized ,updateUserController);
+
+//UPDATE update-user-status  || PUT /api-v1/update-user-status/:userId
+userRouter.put("/update-user-status/:userId", isAuthorized ,updateUserStatusController);
+
+// DELETE USERS || DELETE /api-v1/delete-user/:userId
+userRouter.delete("/delete-user/:userId", isAuthorized ,deleteUserController);
 
 
-// UPDATE USERS || PATCH /api-v1/user/:id
-router.patch("/update-user/:userId", isAuthorized ,updateUserController);
-
-router.put("/update-user-password/:userId", isAuthorized ,updateUserPasswordController);
-
-
-// DELETE USERS || DELETE /api-v1/user/:id
-router.delete("/delete-user/:userId", isAuthorized ,deleteUserController);
 
 
 
 
-export default router;
+export default userRouter;

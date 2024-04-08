@@ -1,13 +1,20 @@
 import UserModel from "../models/user.model.js"; //* Import the UserModel from the models folder
 import ErrorHandler from "../middlewares/error.js";
 import mongoose from "mongoose"; // Import Mongoose for ObjectId validation
-import { sendForgetPasswordLinkByEmail } from "../utils/mailer.js";
-import jwt from "jsonwebtoken";
 import { showUserOutput } from "../helpers/extractUserDetails.js";
 import {
   isAuthorizedAdminAccess,
   isAuthorizedUserAccess,
 } from "../services/authService.js";
+import fs from "fs";
+import path from "path";
+import "jspdf-autotable";
+import { jsPDF } from "jspdf";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 // Delete user
 export const deleteUserController = async (req, res, next) => {
@@ -324,161 +331,144 @@ export const updateUserController = async (req, res, next) => {
   }
 };
 
-// Update user password controller to update user password After logged In to the system.
-export const updateUserPasswordController = async (req, res, next) => {
+//Update user status controller function
+export const updateUserStatusController = async (req, res, next) => {
   const { userId } = req.params;
-  const { password } = req.body;
+  const { status } = req.body;
 
-  // validate
-  if (!password || !userId) {
-    throw new Error("All fields are required");
-  }
-
-  // get req.user from validateToken middleware
-  const loggedUser = req.user;
-
+ 
   try {
-    // Check If  loggedUser not exists
-    if (!loggedUser) {
+    // Verify the Authorized Admin Access
+    if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
       return res
         .status(401)
-        .json({ message: "Unauthorized access", success: false });
-    }
-
-    // const loggedUserEntity = await UserModel.findOne({ _id: loggedUser._id });
-
-    // Check If  loggedUserEntity not exists
-    if (!loggedUser) {
-      return res
-        .status(401)
-        .json({ message: "Unauthorized access", success: false });
-    }
-
-    if (loggedUser.userType !== "Admin") {
-      if (userId != loggedUser._id) {
-        return res
-          .status(401)
-          .json({ message: "Unauthorized login", success: false });
-      }
+        .json({ message: "Unauthorized Access", success: false });
     }
 
     const user = await UserModel.findOne({ _id: userId });
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ message: "User Not Found", success: false });
+      return res.status(404).send({ message: "User Not Found", success: false });
     }
 
-    const isMatch = await user.comparePassword(password);
-    if (isMatch) {
-      throw new Error("Set updated password. Don't set current password");
+    if (!status) {
+      throw new Error("All fields are required");
     }
 
-    // Set the hashed password
-    user.password = password;
-
-    // user.password = password;
-
+    if (status) user.status = status;
     await user.save();
 
-    return res.status(200).json({
-      message: "User Password Updated Successfully",
+    return res.status(200).send({
+      message: "User Status Updated Successfully", 
       success: true,
     });
   } catch (error) {
-    console.log(error);
     return next(error);
   }
 };
 
-// Send email for reset-password due to the forgot password
-export const forgetPasswordSendEmailController = async (req, res, next) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(401).json({ status: 401, message: "Enter Your Email" });
-  }
-
+//Generate user report by Admin
+export const generateUserReport = async (req, res, next) => {
   try {
-    const userfind = await UserModel.findOne({ email: email });
-
-    if (!userfind) {
-      return res.status(404).json({ status: 404, message: "Invaild  Email" });
-    }
-
-    const expiresIn = 600;
-
-    // token generate for reset password
-    const token = jwt.sign({ _id: userfind._id }, process.env.JWT_SECRET_KEY, {
-      expiresIn: expiresIn,
-    });
-
-    const setusertoken = await UserModel.findByIdAndUpdate(
-      { _id: userfind._id },
-      { verifytoken: token },
-      { new: true }
-    );
-    if (setusertoken) {
-      sendForgetPasswordLinkByEmail(userfind, setusertoken, res);
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Verify the id and token in the reset-password link
-export const verifyForgotPasswordLinkController = async (req, res, next) => {
-  const { id, token } = req.params;
-
-  try {
-    const validuser = await UserModel.findOne({ _id: id, verifytoken: token });
-
-    const verifyToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-    console.log("verify token", verifyToken);
-
-    if (validuser && verifyToken._id) {
-      res.status(201).json({ status: 201, validuser });
-    } else {
-      res.status(401).json({ status: 401, message: "user not exist" });
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
-// change password
-export const resetPasswordController = async (req, res, next) => {
-  const { id, token } = req.params;
-  const { password } = req.body;
-
-  try {
-    if (!id || !token || !password) {
-      throw new ErrorHandler(400, "Please provide all fields!");
-    }
-
-    const validuser = await UserModel.findOne({ _id: id, verifytoken: token });
-
-    if (!validuser) {
-      return res.status(401).json({ status: 401, message: "user not exist" });
-    }
-
-    const verifyToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-    if (!verifyToken) {
+    // Verify the Authorized Admin Access
+    if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
       return res
         .status(401)
-        .json({ status: 401, message: "Invalid or Expired token" });
+        .json({ message: "Unauthorized Access", success: false });
     }
 
-    validuser.password = password;
-    validuser.verifytoken = undefined;
+    const users = await UserModel.find({});
 
-    await validuser.save();
+    if (!users.length) {
+      return res.status(404).send("No users found");
+    }
 
-    res.status(201).json({ status: 201, validuser });
+    const unit = "pt";
+    const size = "A4";
+    const orientation = "landscape";
+    const marginLeft = 10;
+    const doc = new jsPDF(orientation, unit, size);
+
+    const title = "Users Report in Gamage Recruiters PVT LTD ";
+    const headers = [
+      [
+        "",
+        "ID",
+        "Full Name",
+        "Email",
+        "Designation",
+        "Employment Type",
+        "User Type",
+        "Status",
+        "Phone",
+      ],
+    ];
+
+    const userData = users.map((user,index) => [
+      ++index,
+      user._id,
+      `${user.firstName} ${user.lastName}`,
+      user.email,
+      user.designation,
+      user.employmentType,
+      user.userType,
+      user.status,
+      user.phone || "",
+    ]);
+
+    let content = {
+      startY: 50,
+      head: headers,
+      body: userData,
+      styles: {
+        font: "helvetica",
+        textColor: [0, 0, 0],
+        setFontSize: 15,
+        overflow: "linebreak",
+      },
+      theme: "striped",
+      headStyles: { fillColor: [59, 130, 246] }, // Changing background color of the header
+      cellPadding: 5, // Adding padding to cells
+
+    };
+
+    function centerText(doc, text, y) {
+      const textWidth =
+        (doc.getStringUnitWidth(text) * doc.internal.getFontSize()) /
+        doc.internal.scaleFactor;
+      const textOffset = (doc.internal.pageSize.width - textWidth) / 2;
+      doc.text(text, textOffset, y);
+    }
+
+    doc.setFontSize(15);
+    centerText(doc, title, 20);
+    doc.autoTable(content);
+
+    // Save the PDF to a buffer
+    const pdfBuffer = doc.output("arraybuffer");
+
+    // Save the PDF to a file
+    const filePath = path.join(__dirname, "../docs", "User-Report.pdf");
+    fs.writeFileSync(filePath, Buffer.from(pdfBuffer));
+
+    // Set the response headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=User-Report.pdf"
+    );
+
+    // Send the PDF buffer as the response
+    res.send(Buffer.from(pdfBuffer));
   } catch (error) {
-    next(error);
+    return next(error);
+
   }
 };
+
+
+
+
+
+
+
