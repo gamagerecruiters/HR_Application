@@ -281,7 +281,9 @@ export const updateUserController = async (req, res, next) => {
   const { firstName, lastName, email, phone, designation, employmentType } =
     req.body;
   try {
-    // Verify the user access
+    // console.log(req.user, isAuthorizedUserAccess(req.user))
+    
+    //Verify the user access
     if (!isAuthorizedUserAccess(req.user)) {
       return res
         .status(401)
@@ -300,7 +302,7 @@ export const updateUserController = async (req, res, next) => {
         .json({ message: "Invalid parameters", success: false });
     }
 
-    if(!(isAuthorizedAdminAccess(req.user, req.isAdmin)) && (req.user._id !== userId)){
+    if(!(isAuthorizedAdminAccess(req.user, req.isAdmin)) && (String(req.user._id) !== userId)){
       throw new ErrorHandler(401, "Unauthorized Access");
     }
 

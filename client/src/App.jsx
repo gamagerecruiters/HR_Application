@@ -21,6 +21,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UsersComponent from "./components/User/UsersComponent";
 import User from "./components/User/User";
 import UserProfile from "./components/User/UserProfile";
+import UpdateUser from "./components/User/UpdateUser";
+import MyProfile from "./components/User/MyProfile";
+import UpdatePassword from "./components/User/UpdatePassword";
 
 const App = () => {
   const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
@@ -33,7 +36,8 @@ const App = () => {
             withCredentials: true,
           }
         );
-        setUser(response.data.user);
+        console.log(response)
+        setUser(response.data.userResult);
         setIsAuthorized(true);
       } catch (error) {
         setIsAuthorized(false);
@@ -64,7 +68,12 @@ const App = () => {
 
         <Route path="/user" element={<User />} />
         <Route path="/user/:id" element={<UserProfile />} />
+        <Route path="/edit-user/:id" element={<UpdateUser />} />
         <Route path="/userComponent" element={<UsersComponent />} />
+        <Route path="/myProfile" element={<MyProfile />} />
+        <Route path="/updatePassword/:id" element={<UpdatePassword />} />
+
+
 
       </Routes>
       <Footer />

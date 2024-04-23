@@ -39,22 +39,34 @@ const Navbar = () => {
                 HOME
               </Link>
             </li>
-            <li>
-              <Link to={"/user"} onClick={() => setShow(false)}>
-                {"user".toUpperCase()}
-              </Link>
-            </li>
+
+            
+
             <li>
               <Link to={"/job/getAll"} onClick={() => setShow(false)}>
                 ALL JOBS
               </Link>
             </li>
+
+            <li>
+              <Link to={"/myProfile"} onClick={() => setShow(false)}>
+                MY PROFILE
+              </Link>
+            </li>
+
             <li>
               <Link to={"/applications/me"} onClick={() => setShow(false)}>
                 {user && user.userType === "Admin"
                   ? "APPLICANT'S APPLICATIONS"
                   : "MY APPLICATIONS"}
               </Link>
+            </li>
+            <li>
+              {(user && user.userType === "Admin") && (
+                <Link to={"/user"} onClick={() => setShow(false)}>
+                  {"user".toUpperCase()}
+                </Link>
+              )}
             </li>
             {user && user.userType === "Admin" ? (
               <>
@@ -72,6 +84,8 @@ const Navbar = () => {
             ) : (
               <></>
             )}
+            
+
             <button onClick={handleLogout}>LOGOUT</button>
           </ul>
           <div className="hamburger">

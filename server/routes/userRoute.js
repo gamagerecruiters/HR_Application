@@ -40,7 +40,7 @@ userRouter.get("/get-user-by-employmentType-designation", isAuthorized ,getFilte
 userRouter.get("/generate-user-report", isAuthorized ,generateUserReport)
 
 // UPDATE USERS || PATCH /api-v1/update-user/:userId
-userRouter.patch("/update-user/:userId", isAuthorized ,updateUserController);
+userRouter.patch("/update-user/:userId" ,isAuthorized,updateUserController);
 
 //UPDATE update-user-status  || PUT /api-v1/update-user-status/:userId
 userRouter.put("/update-user-status/:userId", isAuthorized ,updateUserStatusController);
