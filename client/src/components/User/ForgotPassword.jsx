@@ -1,86 +1,77 @@
-import { useEffect, useState } from "react";
-import { useParams , useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useState } from 'react';
+import axios from 'axios';
 
 const ForgotPassword = () => {
-  const { id, token } = useParams();
+  const [email, setEmail] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const navigate = useNavigate();
-
-  const [password, setPassword] = useState("");
-
-  const [data2, setData] = useState(false);
-
-  const userValid = async () => {
-    try {
-      const response = await axios.get(`http://localhost:8800/api-v1/auth/forgotpassword/${id}/${token}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      console.log("Response" , response)
-
-
-      if (response.status === 201) {
-        console.log("user valid", response);
-      } else {
-        navigate("*");
-        console.log("Invalid", response)
-      }
-    } catch (error) {
-      navigate("*");
-      // Handle errors
-      console.log("Error:", error);
-    }
-  };
-
-  const handleForgetPasswordHandler = async (e) => {
+  const handlePasswordResetHandler = async (e) => {
     e.preventDefault();
+    
     try {
+      // Make a POST request to the backend route
       const response = await axios.post(
-        `http://localhost:8800/api-v1/auth/reset-password/${id}/${token}`,
-        {
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        "http://localhost:8800/api-v1/auth/sendPasswordLink",
+        { email }
       );
 
-      console.log("Response" , response)
+      // Handle the response
+      console.log(response.data); // Log the response data or handle it as needed
+      setSuccessMessage("Password reset link sent successfully!");
+      setErrorMessage(""); // Clear any previous error message
 
-      if (response.status === 201) {
-        console.log("res", response)
-      } else {
-        console.log("No Result")
-      }
+      // Optionally, you can reset the email field after successful submission
+      setEmail("");
+      
     } catch (error) {
-      // Handle errors
-      console.log("Error:", error);
+      // Handle errors if any
+      console.error("Error sending password reset link:", error);
+      setErrorMessage("Error sending password reset link. Please try again.");
+      setSuccessMessage(""); // Clear any previous success message
     }
   };
 
-  
-  useEffect(() => {
-    userValid()
-    setTimeout(() => {
-      setData(true);
-    }, 3000);
-  }, []);
+  // Clear error message when user starts typing in the email input field
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    setErrorMessage(""); // Clear error message
+    setSuccessMessage("");
+  };
+
   return (
-    <div>
-      {data2 && <p>okay</p> }
-      <h1>Enter Your New Password</h1>
-      <input
-        type="password"
-        name="password"
-        id="password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleForgetPasswordHandler}>Submit</button>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+        <h1 className="text-3xl font-bold mb-4">Enter Your Email</h1>
+        <form onSubmit={handlePasswordResetHandler}>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-semibold mb-2">
+              Email Address:
+            </label>
+            <input
+              type="email"
+              className="form-input w-full rounded-md"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={handleEmailChange}
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full w-full"
+          >
+            Submit
+          </button>
+        </form>
+        {/* Display success message if available */}
+        {successMessage && (
+          <p className="text-green-500 mt-4">{successMessage}</p>
+        )}
+        {/* Display error message if available */}
+        {errorMessage && (
+          <p className="text-red-500 mt-4">{errorMessage}</p>
+        )}
+      </div>
     </div>
   );
 };

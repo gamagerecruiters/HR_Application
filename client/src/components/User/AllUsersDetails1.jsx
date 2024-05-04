@@ -31,14 +31,17 @@ const AllUsersDetails1 = () => {
 
   const deleteUser = useCallback(async () => {
     try {
-      await axios.delete(`http://localhost:8800/api-v1/user/delete-user/${deleteUserId}`, {
-        withCredentials: true,
-      });
+      await axios.delete(
+        `http://localhost:8800/api-v1/user/delete-user/${deleteUserId}`,
+        {
+          withCredentials: true,
+        }
+      );
       // Once user is deleted, you may want to refetch the updated user list
       fetchUsers();
       setDeleteUserId(null); // Reset deleteUserId after deletion
     } catch (error) {
-      console.log('Error deleting user:', error);
+      console.log("Error deleting user:", error);
     }
   }, [deleteUserId]);
 
@@ -98,10 +101,10 @@ const AllUsersDetails1 = () => {
   ];
 
   const getRowStyle = (params) => {
-    if (params.row.status === 'Active') {
-      return { backgroundColor: 'green' };
-    } else if (params.row.status === 'Inactive') {
-      return { backgroundColor: 'red' };
+    if (params.row.status === "Active") {
+      return { backgroundColor: "green" };
+    } else if (params.row.status === "Inactive") {
+      return { backgroundColor: "red" };
     }
     return {};
   };
@@ -131,12 +134,20 @@ const AllUsersDetails1 = () => {
     <div className="bg-white shadow-md rounded-lg p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">All Users Details</h2>
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          onClick={handleDownload}
-        >
-          Download
-        </button>
+        <div className=" flex justify-center gap-2">
+          <Link to={'/add-user'}>
+            <button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded">
+              AddUser
+            </button>
+          </Link>
+
+          <button
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+            onClick={handleDownload}
+          >
+            Download
+          </button>
+        </div>
       </div>
       <div style={{ height: 500, width: "100%" }}>
         <DataGrid
@@ -153,7 +164,9 @@ const AllUsersDetails1 = () => {
         <div className="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center">
           <div className="bg-gray-900 bg-opacity-50 absolute inset-0"></div>
           <div className="bg-white rounded-lg p-4 z-20">
-            <p className="text-lg font-semibold mb-4">Are you sure you want to delete this user?</p>
+            <p className="text-lg font-semibold mb-4">
+              Are you sure you want to delete this user?
+            </p>
             <div className="flex justify-end">
               <button
                 className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded mr-2"

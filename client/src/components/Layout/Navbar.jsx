@@ -68,6 +68,13 @@ const Navbar = () => {
                 </Link>
               )}
             </li>
+            <li>
+              {(user && user.userType === "Admin") && (
+                <Link to={"/employee"} onClick={() => setShow(false)}>
+                  {"employee".toUpperCase()}
+                </Link>
+              )}
+            </li>
             {user && user.userType === "Admin" ? (
               <>
                 <li>

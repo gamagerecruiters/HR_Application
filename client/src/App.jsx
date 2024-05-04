@@ -13,7 +13,6 @@ import Navbar from "./components/Layout/Navbar";
 import Register from "./components/Auth/Register";
 import JobDetails from "./components/Job/JobDetails";
 import NotFound from "./components/NotFound/NotFound";
-import PasswordReset from "./components/User/PasswordReset";
 import ForgotPassword from "./components/User/ForgotPassword";
 import Application from "./components/Application/Application";
 import MyApplications from "./components/Application/MyApplications";
@@ -24,6 +23,13 @@ import UserProfile from "./components/User/UserProfile";
 import UpdateUser from "./components/User/UpdateUser";
 import MyProfile from "./components/User/MyProfile";
 import UpdatePassword from "./components/User/UpdatePassword";
+import ResetPassword from "./components/User/ResetPassword";
+import AddUser from "./components/User/AddUser";
+import Employee from "./components/Employee/Employee";
+import AllEmployeesDetails from "./components/Employee/AllEmployeeDetails";
+import EmployeeProfile from "./components/Employee/EmployeeProfile";
+import AddEmployee from "./components/Employee/AddEmployee";
+import UpdateEmployee from "./components/Employee/UpdateEmployee";
 
 const App = () => {
   const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
@@ -53,8 +59,8 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Home />} />
-        <Route path="/password-reset" element={<PasswordReset />} />
-        <Route path="/forgotpassword/:id/:token" element={<ForgotPassword />} />
+        <Route path="/password-reset" element={<ForgotPassword />} />
+        <Route path="/forgotpassword/:id/:token" element={<ResetPassword />} />
         <Route path="/job/getAll" element={<Jobs />} />
         <Route path="/job/:id" element={<JobDetails />} />
         <Route path="/application/:id" element={<Application />} />
@@ -72,6 +78,17 @@ const App = () => {
         <Route path="/userComponent" element={<UsersComponent />} />
         <Route path="/myProfile" element={<MyProfile />} />
         <Route path="/updatePassword/:id" element={<UpdatePassword />} />
+        <Route path="/add-user" element={<AddUser />} />
+
+
+        <Route path="/employee" element={<AllEmployeesDetails />} />
+        <Route path="/employee/:employeeId" element={<EmployeeProfile />} />
+        <Route path="/add-employee" element={<AddEmployee />} />
+        <Route path="/update-employee/:employeeId" element={<UpdateEmployee />} />
+
+
+
+
 
 
 

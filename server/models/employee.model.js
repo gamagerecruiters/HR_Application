@@ -28,18 +28,31 @@ const employeeSchema = new mongoose.Schema(
       required: true,
     },
     jobCategory: {
-        type: String,
-        required: [true, "Job Category is required"],
-        enum: [
-          "Full-time",
-          "Part-time",
-          "Contract",
-          "Internship",
-          "Remote",
-          "Other",
-        ],
-        default: "Full-time",
-      },
+      type: String,
+      required: [true, "Job Category is required"],
+      enum: [
+        "Full-time",
+        "Part-time",
+        "Contract",
+        "Internship",
+        "Remote",
+        "Other",
+      ],
+      default: "Full-time",
+    },
+    department: {
+      type: String,
+      required: [true, "Department is required"],
+      enum: [
+        "HR",
+        "Finance",
+        "IT",
+        "Sales",
+        "Marketing",
+        "Other",
+      ],
+      default: "Other",
+    },
     gender: {
       type: String,
       enum: ["Male", "Female"], // Only accept 'Admin' or 'User' values
@@ -49,22 +62,23 @@ const employeeSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
-    
+
     company: {
       type: String,
       required: true,
     },
     startDate: {
-      type: String,
+      type: Date,
       required: true,
     },
     endDate: {
-      type: String,
+      type: Date,
       required: false,
     },
   },
   { timestamps: true }
 );
+
 
 
 
