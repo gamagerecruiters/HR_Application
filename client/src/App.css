@@ -1136,6 +1136,9 @@ p {
   gap: 20px;
   display: flex;
 }
+
+
+
 @media (max-width: 1520px) {
   .myJobs .container {
     min-width: 100%;
