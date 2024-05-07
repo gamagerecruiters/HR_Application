@@ -1,6 +1,6 @@
 import express from "express";
 import { sendToken } from "../middlewares/jwtValidation.js"; //* Import the validateToken middleware from the middlewares folder
-import {isAuthorized} from "../middlewares/auth.js"
+import {isAuthorized} from "../middlewares/auth.js" //* Import the Authorization middleware from the middlewares folder
 import {
   updateUserController,
   deleteUserController,
@@ -10,62 +10,47 @@ import {
   getFilteredUserByEmploymentTypeAndDesignationController,
   getFilteredUserByEmploymentTypeController,
   getFilteredUserByUserTypeController,
-  updateUserPasswordController,
-  forgetPasswordSendEmailController,
-  verifyForgotPasswordLinkController,
-  resetPasswordController
-} from "../controllers/userController.js"; //* Import the updateUserController from the controllers folder
-// import validateToken from "../middlewares/jwtValidation.js"; //* Import the validateToken middleware from the middlewares folder
+  updateUserStatusController, 
+  generateUserReport
+} from "../controllers/userController.js"; //* Import the needed user controller functions from the controllers folder
 
 
-const router = express.Router();
+const userRouter = express.Router();
 
 //Routes
-// GET USERS || GET /api-v1/user
-router.get("/get-all-users", getAllUsersController);
+// GET all users || GET /api-v1/get-all-users
+userRouter.get("/get-all-users", isAuthorized ,getAllUsersController);  // Access - Admin
 
-router.get("/get-user/:userId", getUserController);
+// GET users by userId || GET /api-v1/get-user/:userId
+userRouter.get("/get-user/:userId", isAuthorized ,getUserController); // Access - User , Admin
 
-router.get("/get-user-by-userType", getFilteredUserByUserTypeController);
+// GET users by userType || GET /api-v1/get-user-by-userType    //  Query Parameters Used
+userRouter.get("/get-user-by-userType", isAuthorized ,getFilteredUserByUserTypeController);
 
-router.get("/get-user-by-designation", getFilteredUserByDesignationController);
+// GET all user by designation || GET /api-v1/get-user-by-designation  //  Query Parameters Used
+userRouter.get("/get-user-by-designation", isAuthorized ,getFilteredUserByDesignationController);
 
-router.get("/get-user-by-employmentType", getFilteredUserByEmploymentTypeController);
+// GET all user by employmentType || GET /api-v1/get-user-by-employmentType  //  Query Parameters Used
+userRouter.get("/get-user-by-employmentType", isAuthorized ,getFilteredUserByEmploymentTypeController);
 
-router.get("/get-user-by-employmentType-designation", getFilteredUserByEmploymentTypeAndDesignationController)
+// GET all user by employmentType and designation || GET /api-v1/get-user-by-employmentType-designation  //  Query Parameters Used
+userRouter.get("/get-user-by-employmentType-designation", isAuthorized ,getFilteredUserByEmploymentTypeAndDesignationController)
 
-router.get("/forgotpassword/:id/:token", verifyForgotPasswordLinkController);
+// GET generate user report || GET /api-v1/generate-report
+userRouter.get("/generate-user-report", isAuthorized ,generateUserReport)
+
+// UPDATE USERS || PATCH /api-v1/update-user/:userId
+userRouter.patch("/update-user/:userId" ,isAuthorized,updateUserController);
+
+//UPDATE update-user-status  || PUT /api-v1/update-user-status/:userId
+userRouter.put("/update-user-status/:userId", isAuthorized ,updateUserStatusController);
+
+// DELETE USERS || DELETE /api-v1/delete-user/:userId
+userRouter.delete("/delete-user/:userId", isAuthorized ,deleteUserController);
 
 
 
 
-// CREATE USERS || POST /api-v1/add-user
 
-// router.post("/add-user", validateToken, addUserController);
-// router.post("/add-user", validateToken , addUserController);
 
-router.post("/sendPasswordLink/", forgetPasswordSendEmailController)
-
-router.post("/reset-password/:id/:token", resetPasswordController )
-
-// UPDATE USERS || PATCH /api-v1/user/:id
-router.patch("/update-user/:userId", updateUserController);
-
-router.put("/update-user-password/:userId", isAuthorized ,updateUserPasswordController);
-
-// UPDATE USER STATUS || PATCH /api-v1/update-user/:userId
-// router.patch(
-//   "/update-user-status/:userId",
-//   updateStatusController
-// );
-
-// DELETE USERS || DELETE /api-v1/user/:id
-router.delete("/delete-user/:userId", deleteUserController);
-router.patch("/update-user/:userId", sendToken, updateUserController);
-
-// UPDATE USER STATUS || PATCH /api-v1/update-user/:userId
-
-// DELETE USERS || DELETE /api-v1/user/:id
-router.delete("/delete-user/:userId", sendToken, deleteUserController);
-
-export default router;
+export default userRouter;
