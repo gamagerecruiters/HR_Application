@@ -144,6 +144,9 @@ export const postApplication = catchAsyncError(async (req, res, next) => {
     },
     applicantID,
     employerID,
+    applicationID: {
+      application: jobId, // Add this line
+    },
   });
   res.status(200).json({
     success: true,
