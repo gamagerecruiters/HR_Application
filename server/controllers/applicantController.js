@@ -17,7 +17,12 @@ export const adminGetAllApplications = catchAsyncError(
       );
     }
     const { _id } = req.user;
-    const applications = await ApplicantModel.find({ "employerID.user": _id });
+    const applications = await ApplicantModel.find({
+      "employerID.user": _id,
+    }).populate({
+      path: "applicationID.application",
+      select: "jobTitle",
+    });
     res.status(200).json({
       success: true,
       applications,

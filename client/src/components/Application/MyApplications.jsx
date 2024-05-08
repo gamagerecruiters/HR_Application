@@ -210,7 +210,7 @@ const AdminCard = ({ element, openModal, applications }) => {
         <div className="detail">
           <p>
             <span>Job Applied:</span>
-            {element.jobTitle}
+            {element.applicationID.application.jobTitle}
           </p>
           <p>
             <span>Name:</span>
