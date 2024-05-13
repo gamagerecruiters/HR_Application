@@ -27,7 +27,9 @@ const MyApplications = () => {
         });
         const jobRes = await axios.get(
           "http://localhost:8800/api-v1/job/getAll",
-          { withCredentials: true }
+          {
+            withCredentials: true,
+          }
         );
 
         console.log(jobRes.data.jobs);
@@ -210,7 +212,7 @@ const AdminCard = ({ element, openModal, applications }) => {
         <div className="detail">
           <p>
             <span>Job Applied:</span>
-            {element.applicationID.application.jobTitle}
+            {element.applicationID?.application?.jobTitle}
           </p>
           <p>
             <span>Name:</span>
