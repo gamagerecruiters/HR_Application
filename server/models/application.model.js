@@ -5,7 +5,6 @@ import mongoose from "mongoose";
 // Application Schema for the database
 const applicationSchema = new mongoose.Schema(
   {
-    _id: { type: String, default: shortid.generate },
     jobTitle: {
       type: String,
       required: true,

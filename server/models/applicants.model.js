@@ -41,6 +41,12 @@ const applicantSchema = new mongoose.Schema({
       required: true,
     },
   },
+  applicationID: {
+    application: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Application",
+    },
+  },
   applicantID: {
     user: {
       type: mongoose.Schema.Types.ObjectId,
