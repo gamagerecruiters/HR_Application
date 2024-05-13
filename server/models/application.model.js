@@ -1,12 +1,10 @@
 import shortid from "shortid";
-import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
 // import bcrypt from "bcryptjs";
 
 // Application Schema for the database
 const applicationSchema = new mongoose.Schema(
   {
-    _id: { type: String, default: shortid.generate },
     jobTitle: {
       type: String,
       required: true,
@@ -60,7 +58,7 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       required: [, "Please provide a job description"],
       minLength: [5, "Job description must be at least 5 characters long"],
-      maxLength: [350, "Job description must not exceed 350 characters"],
+      maxLength: [1000, "Job description must not exceed 350 characters"],
     },
     expired: {
       type: Boolean,

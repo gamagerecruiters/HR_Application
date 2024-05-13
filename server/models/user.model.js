@@ -1,7 +1,7 @@
+import bcrypt from "bcryptjs";
+import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
 import validator from "validator";
-import JWT from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,11 +23,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      select: false, // Do not show the password in the response
     },
     designation: {
       type: String,
-      required: true,
+      required: false,
     },
     employmentType: {
       type: String,
@@ -49,11 +48,21 @@ const userSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    company : {
+      type : String,
+      default : "Gamage Recruiters (Pvt) Ltd",
+      required : false
+    },
+    verifytoken:{
+      type: String,
+      required : false
+  },
     // Google Authentication part
     googleId: {
       type: String,
       unique: true,
       sparse: true,
+      required: false,
     },
     displayName: String,
     image: String,
@@ -62,11 +71,15 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash the password before saving the user to the database
-userSchema.pre("save", async function () {
-  if (!this.isModified) return;
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
+  console.log(this.password)
   this.password = await bcrypt.hash(this.password, salt);
+  next()
 });
+
+
 
 // Compare the password with the hashed password in the database
 userSchema.methods.comparePassword = async function (password) {

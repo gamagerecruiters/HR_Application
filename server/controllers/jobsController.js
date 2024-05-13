@@ -1,10 +1,11 @@
 import moment from "moment";
 import mongoose from "mongoose"; //* Import mongoose
-import ApplicationModel from "../models/application.model.js"; //* Import the ApplicationModel from the models folder
 import ErrorHandler from "../middlewares/error.js";
+import ApplicationModel from "../models/application.model.js"; //* Import the ApplicationModel from the models folder
+import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 
 //* === Create a job application ===
-export const createJobController = async (req, res, next) => {
+export const createJobController = catchAsyncError(async (req, res, next) => {
   const { userType } = req.user;
   if (userType === "User") {
     return next(
@@ -42,41 +43,10 @@ export const createJobController = async (req, res, next) => {
     message: "Job application created successfully",
     job,
   });
-
-  // const {
-  //   jobTitle,
-  //   location,
-  //   experienceLevel,
-  //   jobPosition,
-  //   jobCategory,
-  //   description,
-  //   datePosted,
-  // } = req.body;
-  // try {
-  //   if (
-  //     !jobTitle ||
-  //     !location ||
-  //     !experienceLevel ||
-  //     !jobPosition ||
-  //     !jobCategory ||
-  //     !description ||
-  //     !datePosted
-  //   ) {
-  //     throw new Error("Please provide all fields");
-  //   }
-
-  //   req.body.createdBy = req.user._id; // Add the user id to the job application
-
-  //   const job = await ApplicationModel.create(req.body);
-  //   console.log(req.body);
-  //   res.status(201).send({ job });
-  // } catch (error) {
-  //   next(error);
-  // }
-};
+});
 
 //* === Get all the jobs created by the user ===
-export const getJobsController = async (req, res, next) => {
+export const getJobsController = catchAsyncError(async (req, res, next) => {
   // try {
   // const {
   //   jobTitle,
@@ -153,67 +123,76 @@ export const getJobsController = async (req, res, next) => {
   // } catch (error) {
   //   next(error);
   // }
-};
+});
+
+// Get one job application
+export const getMyJobs = catchAsyncError(async (req, res, next) => {
+  const { userType } = req.user;
+  if (userType === "User") {
+    return next(
+      new ErrorHandler(
+        400,
+        "You are not authorized to view this job application"
+      )
+    );
+  }
+  const myJobs = await ApplicationModel.find({ postedBy: req.user._id });
+  res.status(200).json({
+    success: true,
+    myJobs,
+  });
+});
 
 //* === Update a job application ===
-export const updateJobController = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const {
-      DOB,
-      address,
-      experienceLevel,
-      jobPosition,
-      jobCategory,
-      resume,
-      coverLetter,
-    } = req.body;
-
-    //find the job application by id and update the job application
-    let job = await ApplicationModel.findOne({ _id: id });
-
-    if (!job) {
-      throw new Error("Oops, Job application not found!");
-    }
-    if (!req.user._id === job.createdBy.toString()) {
-      throw new Error("You are not authorized to update this job application");
-    }
-    const updateJob = await ApplicationModel.findOneAndUpdate(
-      { _id: id },
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+export const updateJobController = catchAsyncError(async (req, res, next) => {
+  const { userType } = req.user;
+  if (userType === "User") {
+    return next(
+      new ErrorHandler(
+        400,
+        "You are not authorized to edit this job application"
+      )
     );
-    res.status(200).json({
-      success: true,
-      updateJob,
-      message: "Job application updated successfully!",
-    });
-  } catch (error) {
-    next(error);
   }
-};
+  const { id } = req.params;
+  let job = await ApplicationModel.findById(id);
+  if (!job) {
+    return next(new ErrorHandler(400, "Oops, Job application not found!"));
+  }
+  job = await ApplicationModel.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+  res.status(200).json({
+    success: true,
+    job,
+    message: "Job application updated successfully",
+  });
+});
 
 //* === Delete a job application ===
-export const deleteJobController = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const job = await ApplicationModel.findOne({ _id: id });
-
-    if (!job) {
-      throw new Error(`Job application not found ${id}`);
-    }
-    if (!req.user._id === job.createdBy.toString()) {
-      throw new Error("You are not authorized to delete this job application");
-    }
-    await ApplicationModel.findOneAndDelete();
-    res.status(200).send({ message: "Success, Job Deleted!" });
-  } catch (error) {
-    next(error);
+export const deleteJobController = catchAsyncError(async (req, res, next) => {
+  const { userType } = req.user;
+  if (userType === "User") {
+    return next(
+      new ErrorHandler(
+        400,
+        "You are not authorized to delete this job application"
+      )
+    );
   }
-};
+  const { id } = req.params;
+  const job = await ApplicationModel.findById(id);
+  if (!job) {
+    return next(new ErrorHandler(400, "Oops, Job application not found!"));
+  }
+  await ApplicationModel.deleteOne();
+  res.status(200).json({
+    success: true,
+    message: "Job application deleted successfully",
+  });
+});
 
 //* === Get the job application statistics ===
 export const jobStatsController = async (req, res) => {
@@ -276,3 +255,19 @@ export const jobStatsController = async (req, res) => {
     next(error);
   }
 };
+
+export const getSingleJob = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const job = await ApplicationModel.findById(id);
+    if (!job) {
+      return next(new ErrorHandler(400, "Job not found!"));
+    }
+    res.status(200).json({
+      success: true,
+      job,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(400, "Invalid ID/ CastError!"));
+  }
+});

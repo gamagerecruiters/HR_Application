@@ -23,7 +23,7 @@ const applicantSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide your address"],
     minLength: [5, "Address must be at least 5 characters long"],
-    maxLength: [50, "Address must be at most 50 characters long"],
+    // maxLength: [35, "Address must be at most 35 characters long"],
   },
   coverLetter: {
     type: String,
@@ -39,6 +39,12 @@ const applicantSchema = new mongoose.Schema({
     url: {
       type: String,
       required: true,
+    },
+  },
+  applicationID: {
+    application: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Application",
     },
   },
   applicantID: {

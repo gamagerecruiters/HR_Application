@@ -1,9 +1,9 @@
-import { jsPDF } from "jspdf";
-import "jspdf-autotable";
-import ApplicationModel from "../models/application.model.js";
 import fs from "fs";
 import path from "path";
+import "jspdf-autotable";
+import { jsPDF } from "jspdf";
 import { fileURLToPath } from "url";
+import ApplicationModel from "../models/application.model.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
