@@ -80,7 +80,17 @@ const UpdateUser = () => {
           }
         );
 
+        const userTypeUpdateRes = await axios.put(
+          `http://localhost:8800/api-v1/user/update-user-type/${id}`,
+          { userType: formData.userType },
+          {
+            withCredentials: true,
+          }
+        );
+
         console.log("status res", statusUpdateRes);
+        console.log("user Type res", userTypeUpdateRes);
+
       }
     } catch (error) {
       console.log("Error updating user:", error);

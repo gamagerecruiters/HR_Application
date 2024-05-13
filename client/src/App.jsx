@@ -25,7 +25,6 @@ import MyProfile from "./components/User/MyProfile";
 import UpdatePassword from "./components/User/UpdatePassword";
 import ResetPassword from "./components/User/ResetPassword";
 import AddUser from "./components/User/AddUser";
-import Employee from "./components/Employee/Employee";
 import AllEmployeesDetails from "./components/Employee/AllEmployeeDetails";
 import EmployeeProfile from "./components/Employee/EmployeeProfile";
 import AddEmployee from "./components/Employee/AddEmployee";

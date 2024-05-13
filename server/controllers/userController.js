@@ -369,6 +369,43 @@ export const updateUserStatusController = async (req, res, next) => {
   }
 };
 
+
+//Update user type controller function
+export const updateUserTypeController = async (req, res, next) => {
+  const { userId } = req.params;
+  const { userType } = req.body;
+
+ 
+  try {
+    // Verify the Authorized Admin Access
+    if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized Access", success: false });
+    }
+
+    const user = await UserModel.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).send({ message: "User Not Found", success: false });
+    }
+
+    if (!userType) {
+      throw new Error("All fields are required");
+    }
+
+    if (userType) user.userType = userType;
+    await user.save();
+
+    return res.status(200).send({
+      message: "User Type Updated Successfully", 
+      success: true,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 //Generate user report by Admin
 export const generateUserReport = async (req, res, next) => {
   try {

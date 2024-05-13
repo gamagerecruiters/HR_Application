@@ -11,6 +11,7 @@ import {
   getFilteredUserByEmploymentTypeController,
   getFilteredUserByUserTypeController,
   updateUserStatusController, 
+  updateUserTypeController,
   generateUserReport
 } from "../controllers/userController.js"; //* Import the needed user controller functions from the controllers folder
 
@@ -44,6 +45,9 @@ userRouter.patch("/update-user/:userId" ,isAuthorized,updateUserController);
 
 //UPDATE update-user-status  || PUT /api-v1/update-user-status/:userId
 userRouter.put("/update-user-status/:userId", isAuthorized ,updateUserStatusController);
+
+//UPDATE update-user-status  || PUT /api-v1/update-user-type/:userId
+userRouter.put("/update-user-type/:userId", isAuthorized ,updateUserTypeController);
 
 // DELETE USERS || DELETE /api-v1/delete-user/:userId
 userRouter.delete("/delete-user/:userId", isAuthorized ,deleteUserController);
