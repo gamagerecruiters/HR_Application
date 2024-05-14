@@ -17,7 +17,12 @@ export const adminGetAllApplications = catchAsyncError(
       );
     }
     const { _id } = req.user;
-    const applications = await ApplicantModel.find({ "employerID.user": _id });
+    const applications = await ApplicantModel.find({
+      "employerID.user": _id,
+    }).populate({
+      path: "applicationID.application",
+      select: "jobTitle",
+    });
     res.status(200).json({
       success: true,
       applications,
@@ -58,7 +63,7 @@ export const userDeleteApplication = catchAsyncError(async (req, res, next) => {
     );
   }
   const { id } = req.params;
-  const application = await ApplicantModel.findById(id);
+  const application = await ApplicantModel.findByIdAndDelete(id);
   if (!application) {
     return next(new ErrorHandler(404, "Oops, Application not found!"));
   }
@@ -144,6 +149,9 @@ export const postApplication = catchAsyncError(async (req, res, next) => {
     },
     applicantID,
     employerID,
+    applicationID: {
+      application: jobId, // Add this line
+    },
   });
   res.status(200).json({
     success: true,

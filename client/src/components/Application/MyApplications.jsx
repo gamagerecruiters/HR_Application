@@ -15,30 +15,44 @@ const MyApplications = () => {
   const navigateTo = useNavigate();
 
   useEffect(() => {
-    try {
-      if (user && user?.userType === "Admin") {
-        axios
-          .get("http://localhost:8800/api-v1/application/admin-getAll", {
+    const fetchData = async () => {
+      try {
+        let endpoint = "http://localhost:8800/api-v1/application/user-getAll";
+        if (user && user?.userType === "Admin") {
+          endpoint = "http://localhost:8800/api-v1/application/admin-getAll";
+        }
+
+        const applicationRes = await axios.get(endpoint, {
+          withCredentials: true,
+        });
+        const jobRes = await axios.get(
+          "http://localhost:8800/api-v1/job/getAll",
+          {
             withCredentials: true,
-          })
-          .then((res) => {
-            setApplications(res.data.applications);
-          });
-        console.log(applications);
-      } else {
-        axios
-          .get("http://localhost:8800/api-v1/application/user-getAll", {
-            withCredentials: true,
-          })
-          .then((res) => {
-            setApplications(res.data.applications);
-          });
+          }
+        );
+
+        console.log(jobRes.data.jobs);
+
+        const jobs = jobRes.data.jobs;
+        const applications = applicationRes.data.applications.map(
+          (application) => {
+            const job = jobs.find((job) => job._id === application.jobId);
+            return {
+              ...application,
+              jobTitle: job ? job.title : "Job not found",
+            };
+          }
+        );
+
+        setApplications(applications);
+      } catch (error) {
+        toast.error(error.response.data.message);
       }
-      console.log(applications);
-    } catch (error) {
-      toast.error(error.response.data.message);
-    }
-  }, [isAuthorized]);
+    };
+
+    fetchData();
+  }, [isAuthorized, user]);
 
   if (!isAuthorized) {
     navigateTo("/login");
@@ -47,9 +61,12 @@ const MyApplications = () => {
   const deleteApplication = async (id) => {
     try {
       axios
-        .delete(`http://localhost:8800/api-v1/job/delete-job/${id}`, {
-          withCredentials: true,
-        })
+        .delete(
+          `http://localhost:8800/api-v1/application/user-delete-application/${id}`,
+          {
+            withCredentials: true,
+          }
+        )
         .then((res) => {
           toast.success(res.data.message);
           setApplications((prevApplication) =>
@@ -188,11 +205,15 @@ const UserCard = ({ element, deleteApplication, openModal, applications }) => {
   );
 };
 
-const AdminCard = ({ element, deleteApplication, openModal, applications }) => {
+const AdminCard = ({ element, openModal, applications }) => {
   return (
     <>
       <div className="job_seeker_card">
         <div className="detail">
+          <p>
+            <span>Job Applied:</span>
+            {element.applicationID?.application?.jobTitle}
+          </p>
           <p>
             <span>Name:</span>
             {element.name}
