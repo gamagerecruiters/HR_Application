@@ -1,13 +1,13 @@
 import Index from "views/Index.js";
 import Profile from "views/examples/Profile.js";
-import Maps from "views/examples/Maps.js";
 import Register from "views/examples/Register.js";
 import Login from "views/examples/Login.js";
 import Tables from "views/examples/Tables.js";
-import Icons from "views/examples/Icons.js";
 import EmpTable from "views/employee/EmpTable";
 import JobTable from "views/jobs/JobTable";
 import ApplicationTable from "views/application/ApplicationTable";
+import LeavesTable from "views/leaves/LeavesTable";
+import LeavesApplyForm from "views/leaves/LeavesApplyForm";
 
 var routes = [
   {
@@ -21,7 +21,14 @@ var routes = [
     path: "/leaves",
     name: "Leaves",
     icon: "ni ni-calendar-grid-58 text-purple",
-    component: <Tables />,
+    component: <LeavesTable />,
+    layout: "/admin",
+  },
+  {
+    path: "/leaves/apply",
+    name: "Leave Request",
+    icon: "ni ni-curved-next text-default",
+    component: <LeavesApplyForm />,
     layout: "/admin",
   },
   {
