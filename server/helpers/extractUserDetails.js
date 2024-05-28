@@ -12,7 +12,8 @@ export const showUserOutput = (user) => {
         userType : user.userType,
         status : user.status,
         phone : user.phone,
-        company : user.company
+        company : user.company,
+        supervisor : user.supervisor
 
     }
     return userOutput

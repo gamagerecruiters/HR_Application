@@ -4,6 +4,7 @@ import mongoose from "mongoose"; // Import Mongoose for ObjectId validation
 import {
   isAuthorizedAdminAccess,
   isAuthorizedUserAccess,
+  isAuthorizedSuperAdminAccess
 } from "../services/authService.js";
 import fs from "fs";
 import path from "path";
@@ -102,7 +103,7 @@ export const createEmployeeController = async (req, res, next) => {
 export const getAllEmployeeController = async (req, res, next) => {
   try {
     // Verify the Authorized Admin Access
-    if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
+    if (!isAuthorizedSuperAdminAccess(req.user, req.isSuperAdmin) && !isAuthorizedAdminAccess(req.user, req.isAdmin)) {
       return res
         .status(401)
         .json({ message: "Unauthorized Access", success: false });
@@ -138,12 +139,7 @@ export const getEmployeeController = async (req, res, next) => {
         .json({ message: "Unauthorized Access", success: false });
     }
 
-    // Verify the Authorized Admin Access
-    if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
-      return res
-        .status(401)
-        .json({ message: "Unauthorized Access", success: false });
-    }
+    
 
     // validate
     if (!employeeId) {
