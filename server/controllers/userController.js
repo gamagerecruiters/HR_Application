@@ -5,6 +5,7 @@ import { showUserOutput } from "../helpers/extractUserDetails.js";
 import {
   isAuthorizedAdminAccess,
   isAuthorizedUserAccess,
+  isAuthorizedSuperAdminAccess,
 } from "../services/authService.js";
 import fs from "fs";
 import path from "path";
@@ -14,7 +15,6 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 
 // Delete user
 export const deleteUserController = async (req, res, next) => {
@@ -26,7 +26,6 @@ export const deleteUserController = async (req, res, next) => {
         .status(401)
         .json({ message: "Unauthorized Access", success: false });
     }
-
 
     // Find the user by id and delete that user from database
     const deletedUser = await UserModel.findByIdAndDelete({ _id: userId });
@@ -49,14 +48,19 @@ export const deleteUserController = async (req, res, next) => {
 export const getAllUsersController = async (req, res, next) => {
   try {
     // Verify the Authorized Admin Access
-    if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
+    if (!isAuthorizedSuperAdminAccess(req.user, req.isSuperAdmin)) {
       return res
         .status(401)
         .json({ message: "Unauthorized Access", success: false });
     }
 
     // Find all users
-    const allUsers = await UserModel.find();
+    const allUsers = await UserModel.find()
+      .populate({
+        path: "supervisor",
+        select: "lastName", // Select only the lastName of the supervisor
+      })
+      .exec();
 
     if (!allUsers || allUsers.length === 0) {
       return res
@@ -78,6 +82,92 @@ export const getAllUsersController = async (req, res, next) => {
     next(error);
   }
 };
+
+// Filter all users of supervisors
+export const getAllSupervisorsController = async (req, res, next) => {
+  try {
+    // Verify the Authorized Admin Access
+    if (!isAuthorizedSuperAdminAccess(req.user, req.isSuperAdmin)) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized Access", success: false });
+    }
+
+    // Find all users
+    const allUsers = await UserModel.find({ userType: "Admin" });
+
+    if (!allUsers || allUsers.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Users not found", success: false });
+    }
+
+    // Filter the required fields for the response. To prevent sending the password field to the response
+    const usersOutput = allUsers.map((user) => {
+      return showUserOutput(user);
+    });
+
+    res.status(200).json({
+      message: "Users fetched successfully",
+      success: true,
+      users: usersOutput,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Retrieve user by Id
+// export const getUserController = async (req, res, next) => {
+//   const { userId } = req.params;
+//   try {
+//     // Verify the user access
+//     if (!isAuthorizedUserAccess(req.user)) {
+//       return res
+//         .status(401)
+//         .json({ message: "Unauthorized Access", success: false });
+//     }
+
+//     // validate
+//     if (!userId) {
+//       throw new ErrorHandler(400, "Please provide all fields!");
+//     }
+
+//     // Check if userId is a valid ObjectId
+//     if (!mongoose.Types.ObjectId.isValid(userId)) {
+//       return res
+//         .status(400)
+//         .json({ message: "Invalid parameters", success: false });
+//     }
+
+//     // if(!(isAuthorizedAdminAccess(req.user, req.isAdmin)) && (req.user._id !== userId)){
+//     //   throw new ErrorHandler(401, "Unauthorized Access");
+//     // }
+
+//     // Find user by Id
+//     const user = await UserModel.find({ _id: userId });
+
+//     // If user not exist
+//     if (!user || user.length === 0) {
+//       return res
+//         .status(404)
+//         .json({ message: "User not found", success: false });
+//     }
+
+//     // Filter the required fields for the response. To prevent sending the password field to the response
+//     const userOutput = user.map((user) => {
+//       return showUserOutput(user);
+//     });
+
+//     res.status(200).json({
+//       message: "User fetched successfully",
+//       success: true,
+//       user: userOutput,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 // Retrieve user by Id
 export const getUserController = async (req, res, next) => {
@@ -102,25 +192,23 @@ export const getUserController = async (req, res, next) => {
         .json({ message: "Invalid parameters", success: false });
     }
 
-    // if(!(isAuthorizedAdminAccess(req.user, req.isAdmin)) && (req.user._id !== userId)){
-    //   throw new ErrorHandler(401, "Unauthorized Access");
-    // }
+    // Find user by Id and populate the supervisor field
+    const user = await UserModel.findById(userId)
+      .populate({
+        path: "supervisor",
+        select: "lastName", // Select only the lastName of the supervisor
+      })
+      .exec();
 
-    
-    // Find user by Id
-    const user = await UserModel.find({ _id: userId });
-
-    // If user not exist 
-    if (!user || user.length === 0) {
+    // If user not exist
+    if (!user) {
       return res
         .status(404)
         .json({ message: "User not found", success: false });
     }
 
     // Filter the required fields for the response. To prevent sending the password field to the response
-    const userOutput = user.map((user) => {
-      return showUserOutput(user);
-    });
+    const userOutput = showUserOutput(user);
 
     res.status(200).json({
       message: "User fetched successfully",
@@ -282,7 +370,7 @@ export const updateUserController = async (req, res, next) => {
     req.body;
   try {
     // console.log(req.user, isAuthorizedUserAccess(req.user))
-    
+
     //Verify the user access
     if (!isAuthorizedUserAccess(req.user)) {
       return res
@@ -302,7 +390,10 @@ export const updateUserController = async (req, res, next) => {
         .json({ message: "Invalid parameters", success: false });
     }
 
-    if(!(isAuthorizedAdminAccess(req.user, req.isAdmin)) && (String(req.user._id) !== userId)){
+    if (
+      !isAuthorizedAdminAccess(req.user, req.isAdmin) &&
+      String(req.user._id) !== userId
+    ) {
       throw new ErrorHandler(401, "Unauthorized Access");
     }
 
@@ -338,7 +429,6 @@ export const updateUserStatusController = async (req, res, next) => {
   const { userId } = req.params;
   const { status } = req.body;
 
- 
   try {
     // Verify the Authorized Admin Access
     if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
@@ -350,7 +440,9 @@ export const updateUserStatusController = async (req, res, next) => {
     const user = await UserModel.findOne({ _id: userId });
 
     if (!user) {
-      return res.status(404).send({ message: "User Not Found", success: false });
+      return res
+        .status(404)
+        .send({ message: "User Not Found", success: false });
     }
 
     if (!status) {
@@ -361,7 +453,97 @@ export const updateUserStatusController = async (req, res, next) => {
     await user.save();
 
     return res.status(200).send({
-      message: "User Status Updated Successfully", 
+      message: "User Status Updated Successfully",
+      success: true,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+//Update user supervisor controller function
+export const updateUserSupervisorController = async (req, res, next) => {
+  const { userId } = req.params;
+  const { supervisorId } = req.body;
+
+  try {
+    // Verify the Authorized Admin Access
+    if (!isAuthorizedSuperAdminAccess(req.user, req.isSuperAdmin)) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized Access", success: false });
+    }
+
+    const user = await UserModel.findOne({ _id: userId });
+
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: "User Not Found", success: false });
+    }
+
+    if (!supervisorId) {
+      throw new Error("All fields are required");
+    }
+
+    if (supervisorId) {
+      // Check if supervisorId is a valid ObjectId
+      if (!mongoose.Types.ObjectId.isValid(supervisorId)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid parameters", success: false });
+      }
+
+      const supervisor = await UserModel.findById(supervisorId);
+      if (!supervisor || supervisor.userType !== "Admin") {
+        return res.status(400).json({
+          message: "Invalid supervisor ID or supervisor is not an Admin",
+        });
+      }
+
+      user.supervisor = supervisorId;
+    }
+    await user.save();
+
+    return res.status(200).send({
+      message: "User Status Updated Successfully",
+      success: true,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+//Update user type controller function
+export const updateUserTypeController = async (req, res, next) => {
+  const { userId } = req.params;
+  const { userType } = req.body;
+
+  try {
+    // Verify the Authorized Admin Access
+    if (!isAuthorizedAdminAccess(req.user, req.isAdmin)) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized Access", success: false });
+    }
+
+    const user = await UserModel.findOne({ _id: userId });
+
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: "User Not Found", success: false });
+    }
+
+    if (!userType) {
+      throw new Error("All fields are required");
+    }
+
+    if (userType) user.userType = userType;
+    await user.save();
+
+    return res.status(200).send({
+      message: "User Type Updated Successfully",
       success: true,
     });
   } catch (error) {
@@ -406,7 +588,7 @@ export const generateUserReport = async (req, res, next) => {
       ],
     ];
 
-    const userData = users.map((user,index) => [
+    const userData = users.map((user, index) => [
       ++index,
       user._id,
       `${user.firstName} ${user.lastName}`,
@@ -431,7 +613,6 @@ export const generateUserReport = async (req, res, next) => {
       theme: "striped",
       headStyles: { fillColor: [59, 130, 246] }, // Changing background color of the header
       cellPadding: 5, // Adding padding to cells
-
     };
 
     function centerText(doc, text, y) {
@@ -464,13 +645,5 @@ export const generateUserReport = async (req, res, next) => {
     res.send(Buffer.from(pdfBuffer));
   } catch (error) {
     return next(error);
-
   }
 };
-
-
-
-
-
-
-

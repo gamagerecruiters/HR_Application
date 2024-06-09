@@ -25,14 +25,23 @@ import MyProfile from "./components/User/MyProfile";
 import UpdatePassword from "./components/User/UpdatePassword";
 import ResetPassword from "./components/User/ResetPassword";
 import AddUser from "./components/User/AddUser";
-import Employee from "./components/Employee/Employee";
 import AllEmployeesDetails from "./components/Employee/AllEmployeeDetails";
 import EmployeeProfile from "./components/Employee/EmployeeProfile";
 import AddEmployee from "./components/Employee/AddEmployee";
 import UpdateEmployee from "./components/Employee/UpdateEmployee";
+import UserLeaveTable from "./components/Leave/UserLeaveTable";
+import ApplyLeave from "./components/Leave/ApplyLeave";
+import UpdateLeave from "./components/Leave/UpdateLeave";
+import LeaveRequestByUsers from "./components/Leave/LeaveRequestByUsers";
+import LeaveRequestBySupervisor from "./components/Leave/LeaveRequestBySupervisor";
+import LeaveStatistics from "./components/Leave/LeaveStatistics";
+import ShowLeave from "./components/Leave/ShowLeave";
+import UserLeaveRenderPage from "./components/Leave/UserLeaveRenderPage";
+import SupervisorLeaveRenderPage from "./components/Leave/SupervisorLeaveRenderPage";
+import SuperAdminLeaveRenderPage from "./components/Leave/SuperAdminLeaveRenderPage";
 
 const App = () => {
-  const { isAuthorized, setIsAuthorized, setUser } = useContext(Context);
+  const { isAuthorized, setIsAuthorized, setUser , user} = useContext(Context);
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -44,13 +53,23 @@ const App = () => {
         );
         console.log(response)
         setUser(response.data.userResult);
+        console.log("user", user)
         setIsAuthorized(true);
       } catch (error) {
         setIsAuthorized(false);
       }
     };
     fetchUser();
-  }, [isAuthorized]);
+  }, [setIsAuthorized, setUser]);
+
+  const getLeavePage = () => {
+    if(user.userType === "User"){
+      return <UserLeaveRenderPage/>
+    }
+    else if (user.userType === "Admin"){
+      return <SupervisorLeaveRenderPage/>
+    }
+  }
 
   return (
     <Router>
@@ -85,6 +104,24 @@ const App = () => {
         <Route path="/employee/:employeeId" element={<EmployeeProfile />} />
         <Route path="/add-employee" element={<AddEmployee />} />
         <Route path="/update-employee/:employeeId" element={<UpdateEmployee />} />
+
+
+        {user && user.userType === "User" && <Route path="/leave" element={<UserLeaveRenderPage/>} />}
+        {user && user.userType === "Admin" && <Route path="/leave" element={<SupervisorLeaveRenderPage/>} />}
+        {user && user.userType === "SuperAdmin" && <Route path="/leave" element={<SuperAdminLeaveRenderPage/>} />}
+
+
+        <Route path="/leave-statistics" element={<LeaveStatistics/>} />
+        <Route path="/view-leave/:leaveId" element={<ShowLeave />} />
+        <Route path="/apply-leave" element={<ApplyLeave />} />
+        <Route path="/update-leave/:leaveId" element={<UpdateLeave />} />
+        <Route path="/leave-request-check-supervisor" element={<LeaveRequestByUsers />} />
+        <Route path="/leave-request-check-admin" element={<LeaveRequestBySupervisor />} />
+
+
+
+
+
 
 
 

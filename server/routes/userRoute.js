@@ -11,7 +11,10 @@ import {
   getFilteredUserByEmploymentTypeController,
   getFilteredUserByUserTypeController,
   updateUserStatusController, 
-  generateUserReport
+  updateUserTypeController,
+  generateUserReport,
+  updateUserSupervisorController,
+  getAllSupervisorsController
 } from "../controllers/userController.js"; //* Import the needed user controller functions from the controllers folder
 
 
@@ -27,6 +30,9 @@ userRouter.get("/get-user/:userId", isAuthorized ,getUserController); // Access 
 // GET users by userType || GET /api-v1/get-user-by-userType    //  Query Parameters Used
 userRouter.get("/get-user-by-userType", isAuthorized ,getFilteredUserByUserTypeController);
 
+// GET all supervisors (Admins) || GET /api-v1/Admins
+userRouter.get("/admins", isAuthorized ,getAllSupervisorsController);
+
 // GET all user by designation || GET /api-v1/get-user-by-designation  //  Query Parameters Used
 userRouter.get("/get-user-by-designation", isAuthorized ,getFilteredUserByDesignationController);
 
@@ -39,11 +45,17 @@ userRouter.get("/get-user-by-employmentType-designation", isAuthorized ,getFilte
 // GET generate user report || GET /api-v1/generate-report
 userRouter.get("/generate-user-report", isAuthorized ,generateUserReport)
 
+// UPDATE  supervisor to user || PUT /api-v1/supervisorToUser
+userRouter.put("/supervisorToUser/:userId", isAuthorized, updateUserSupervisorController)
+
 // UPDATE USERS || PATCH /api-v1/update-user/:userId
 userRouter.patch("/update-user/:userId" ,isAuthorized,updateUserController);
 
 //UPDATE update-user-status  || PUT /api-v1/update-user-status/:userId
 userRouter.put("/update-user-status/:userId", isAuthorized ,updateUserStatusController);
+
+//UPDATE update-user-status  || PUT /api-v1/update-user-type/:userId
+userRouter.put("/update-user-type/:userId", isAuthorized ,updateUserTypeController);
 
 // DELETE USERS || DELETE /api-v1/delete-user/:userId
 userRouter.delete("/delete-user/:userId", isAuthorized ,deleteUserController);

@@ -13,7 +13,8 @@ const UserProfile = () => {
         const response = await axios.get(`http://localhost:8800/api-v1/user/get-user/${id}`, {
           withCredentials: true
         });
-        setUser(response.data.user[0]);
+        console.log(response)
+        setUser(response.data.user);
         setLoading(false);
       } catch (error) {
         console.log('Error fetching user data:', error);
@@ -65,6 +66,10 @@ const UserProfile = () => {
           <div>
             <p className="text-lg font-medium mb-2 text-gray-700">Company:</p>
             <p className="text-lg text-gray-900">{user.company}</p>
+          </div>
+          <div>
+            <p className="text-lg font-medium mb-2 text-gray-700">Supervisor:</p>
+            <p className="text-lg text-gray-900">{user.supervisor.lastName}</p>
           </div>
           {/* Add more fields here as needed */}
         </div>
