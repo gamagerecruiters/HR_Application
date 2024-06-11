@@ -36,7 +36,7 @@ const EmpTable = () => {
               </CardHeader>
               <Table className="align-items-center table-flush" responsive>
                 <thead className="thead-light">
-                  <tr style={{ textAlign: "center" }}>
+                  <tr>
                     <th scope="col">Full Name</th>
                     <th scope="col">Birth Date</th>
                     <th scope="col">Mobile No</th>
