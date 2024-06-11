@@ -50,3 +50,12 @@ const createApplication = async (data) => {
     console.error(error);
   }
 };
+
+const applicationService = {
+  adminGetAllApplications,
+  userGetAllApplications,
+  userDeleteApplication,
+  createApplication,
+};
+
+export default applicationService;
