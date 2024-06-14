@@ -75,8 +75,8 @@ const userSchema = new mongoose.Schema(
         validator: async function (value) {
           if (value) {
             const supervisor = await mongoose.model("User").findById(value);
-            if(supervisor && supervisor.userType === "Admin"){
-              return value
+            if(supervisor && supervisor.userType === "Admin"){  // Admin means supervisor role
+              return value 
             }
           }
           return null; // If no supervisor is set, it's valid

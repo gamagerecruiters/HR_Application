@@ -231,6 +231,256 @@ export const getallSuperAdminApprovedleaveController = async (req, res, next) =>
   }
 };
 
+
+// Get Leaves of users of specified supervisor controller function
+export const getLeavesBySupervisorController = async (req, res, next) => {
+  const { supervisorId } = req.params;
+
+  try {
+    // Validate supervisorId
+    if (!supervisorId) {
+      return res.status(400).json({ message: "Supervisor ID is required", success: false });
+    }
+
+    // Check if supervisorId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(supervisorId)) {
+      return res.status(400).json({ message: "Invalid Supervisor ID", success: false });
+    }
+
+    // Perform an aggregation to get leave details along with user information
+    const leaves = await LeaveModel.aggregate([
+      {
+        $lookup: {
+          from: "users", // The collection name in MongoDB
+          localField: "userId",
+          foreignField: "_id",
+          as: "userDetails"
+        }
+      },
+      { $unwind: "$userDetails" }, // Unwind the userDetails array
+      { 
+        $match: { "userDetails.supervisor": new mongoose.Types.ObjectId(supervisorId) } 
+      }, // Match the users supervised by the given supervisorId
+      {
+        $lookup: {
+          from: "users", // The collection name in MongoDB
+          localField: "userDetails.supervisor",
+          foreignField: "_id",
+          as: "supervisorDetails"
+        }
+      },
+      { $unwind: { path: "$supervisorDetails", preserveNullAndEmptyArrays: true } }, // Unwind the supervisorDetails array and allow for null
+      {
+        $project: {
+          _id: 1,
+          userId: 1,
+          startDate: 1,
+          endDate: 1,
+          type: 1,
+          reason: 1,
+          adminApproval: 1,
+          supervisorApproval: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          "userDetails.firstName": 1,
+          "userDetails.lastName": 1,
+          "userDetails.email": 1,
+          "userDetails.designation": 1,
+          "userDetails.employmentType": 1,
+          "supervisorDetails.firstName": 1,
+          "supervisorDetails.lastName": 1,
+          "supervisorDetails.email": 1,
+          "supervisorDetails.designation": 1,
+        }
+      }
+    ]);
+
+    // Respond with the leave records and user details
+    res.status(200).json({ success: true, data: leaves });
+  } catch (error) {
+    // Handle error
+    console.log("err", error);
+    next(error);
+  }
+};
+
+
+// Get leave details of user by filter option controller function
+export const getLeaveDetailsByFilterController = async (req, res, next) => {
+  const { userId, filter } = req.params;
+
+  try {
+    // Validate userId
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required", success: false });
+    }
+
+    // Check if userId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid User ID", success: false });
+    }
+
+    // Validate filter
+    const validFilters = ["Pending", "Approved", "Rejected"];
+    if (!filter || !validFilters.includes(filter)) {
+      return res.status(400).json({ message: "Invalid filter provided", success: false });
+    }
+
+    // Define match criteria based on the filter
+    let matchCriteria = { userId: new mongoose.Types.ObjectId(userId) };
+    if (filter === "Pending") {
+      matchCriteria.$or = [{ supervisorApproval: "Pending" }, { adminApproval: "Pending", supervisorApproval : "Approved" }];
+    } else if (filter === "Approved") {
+      matchCriteria.adminApproval = "Approved";
+    } else if (filter === "Rejected") {
+      matchCriteria.$or = [{ supervisorApproval: "Rejected" }, { adminApproval: "Rejected" }];
+    }
+
+    // Perform aggregation to get leave details along with user information
+    const leaveDetails = await LeaveModel.aggregate([
+      { $match: matchCriteria },
+      {
+        $lookup: {
+          from: "users", // The collection name in MongoDB
+          localField: "userId",
+          foreignField: "_id",
+          as: "userDetails"
+        }
+      },
+      { $unwind: "$userDetails" }, // Unwind the userDetails array
+      {
+        $lookup: {
+          from: "users", // The collection name in MongoDB
+          localField: "userDetails.supervisor",
+          foreignField: "_id",
+          as: "supervisorDetails"
+        }
+      },
+      { $unwind: { path: "$supervisorDetails", preserveNullAndEmptyArrays: true } }, // Unwind the supervisorDetails array and allow for null
+      {
+        $project: {
+          _id: 1,
+          userId: 1,
+          startDate: 1,
+          endDate: 1,
+          type: 1,
+          reason: 1,
+          adminApproval: 1,
+          supervisorApproval: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          "userDetails.firstName": 1,
+          "userDetails.lastName": 1,
+          "userDetails.email": 1,
+          "userDetails.designation": 1,
+          "userDetails.employmentType": 1,
+          "supervisorDetails.firstName": 1,
+          "supervisorDetails.lastName": 1,
+          "supervisorDetails.email": 1,
+          "supervisorDetails.designation": 1,
+        }
+      }
+    ]);
+
+    // Respond with the filtered leave records and user details
+    res.status(200).json({ success: true, data: leaveDetails });
+  } catch (error) {
+    // Handle error
+    console.log("err", error);
+    next(error);
+  }
+};
+
+// Update leave supervisor approval controller function by supervisor(Admin)
+export const updateLeaveSupervisorApprovalController = async (req, res, next) => {
+  const { leaveId } = req.params;
+  const { supervisorApproval } = req.body;
+
+  try {
+    // Validate supervisorApproval
+    const validStatuses = ["Pending", "Approved", "Rejected"];
+    if (!supervisorApproval || !validStatuses.includes(supervisorApproval)) {
+      return res.status(400).json({ message: "Invalid approval status", success: false });
+    }
+
+    // Check if leaveId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(leaveId)) {
+      return res.status(400).json({ message: "Invalid Leave ID", success: false });
+    }
+
+    // Find the leave request by ID
+    const leaveRequest = await LeaveModel.findById(leaveId);
+    if (!leaveRequest) {
+      return res.status(404).json({ message: "Leave request not found", success: false });
+    }
+
+    // Update supervisorApproval
+    leaveRequest.supervisorApproval = supervisorApproval;
+
+    // If supervisorApproval is "Rejected", set adminApproval to "Rejected"
+    if (supervisorApproval === "Rejected") {
+      leaveRequest.adminApproval = "Rejected";
+    }
+
+    // Save the updated leave request
+    await leaveRequest.save();
+
+    // Respond with the updated leave request
+    res.status(200).json({ success: true, data: leaveRequest });
+  } catch (error) {
+    // Handle error
+    console.log("err", error);
+    next(error);
+  }
+};
+
+// Update leave admin approval controller function by admin(SuperAdmin)
+export const updateLeaveSuperAdminApprovalController = async (req, res, next) => {
+  const { leaveId } = req.params;
+  const { adminApproval } = req.body;
+
+  try {
+    // Validate supervisorApproval
+    const validStatuses = ["Pending", "Approved", "Rejected"];
+    if (!adminApproval || !validStatuses.includes(adminApproval)) {
+      return res.status(400).json({ message: "Invalid approval status", success: false });
+    }
+
+    // Check if leaveId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(leaveId)) {
+      return res.status(400).json({ message: "Invalid Leave ID", success: false });
+    }
+
+    // Find the leave request by ID
+    const leaveRequest = await LeaveModel.findById(leaveId);
+    if (!leaveRequest) {
+      return res.status(404).json({ message: "Leave request not found", success: false });
+    }
+
+    // Update supervisorApproval
+    if(leaveRequest.supervisorApproval !== "Approved"){
+      return res.status(404).json({ message: "No intermediate approval", success: false });
+    }
+
+    leaveRequest.adminApproval = adminApproval
+
+
+    
+
+    // Save the updated leave request
+    await leaveRequest.save();
+
+    // Respond with the updated leave request
+    res.status(200).json({ success: true, data: leaveRequest });
+  } catch (error) {
+    // Handle error
+    console.log("err", error);
+    next(error);
+  }
+};
+
+
+
 export const getallSuperAdminRejectedleaveController = async (req, res, next) => {
   try {
 
@@ -259,6 +509,7 @@ export const getallSuperAdminRejectedleaveController = async (req, res, next) =>
   }
 };
 
+// Get all leaves by admin controller function
 export const getAllLeaveDetailsController = async (req, res, next) => {
   try {
 
@@ -302,7 +553,7 @@ export const getLeaveDetailsByUserIdController = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid parameters", success: false });
     }
 
-    // Perform an aggregation to get leave details along with user information
+    // Perform an aggregation to get leave details along with user and supervisor information
     const userLeaves = await LeaveModel.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       {
@@ -314,6 +565,15 @@ export const getLeaveDetailsByUserIdController = async (req, res, next) => {
         }
       },
       { $unwind: "$userDetails" }, // Unwind the userDetails array
+      {
+        $lookup: {
+          from: "users", // The collection name in MongoDB
+          localField: "userDetails.supervisor",
+          foreignField: "_id",
+          as: "supervisorDetails"
+        }
+      },
+      { $unwind: { path: "$supervisorDetails", preserveNullAndEmptyArrays: true } }, // Unwind the supervisorDetails array and allow for null
       {
         $project: {
           _id: 1,
@@ -331,7 +591,94 @@ export const getLeaveDetailsByUserIdController = async (req, res, next) => {
           "userDetails.email": 1,
           "userDetails.designation": 1,
           "userDetails.employmentType": 1,
+          "supervisorDetails.firstName": 1,
+          "supervisorDetails.lastName": 1,
+          "supervisorDetails.email": 1,
+          "supervisorDetails.designation": 1,
+        }
+      }
+    ]);
 
+    // Respond with the leave records, user details, and supervisor details
+    res.status(200).json({ success: true, data: userLeaves });
+  } catch (error) {
+    // Handle error
+    console.log("err", error);
+    next(error);
+  }
+};
+
+
+// Filter leaves of specified user by month and year
+export const getLeavesWithDetailsByUserIdfilterController = async (req, res, next) => {
+  const { userId } = req.params;
+  const { month, year } = req.query;
+
+  try {
+    // Validate userId
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required", success: false });
+    }
+
+    // Check if userId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid User ID", success: false });
+    }
+
+    // Validate month and year
+    if (!month || !year) {
+      return res.status(400).json({ message: "Month and Year are required", success: false });
+    }
+
+    const startDate = new Date(year, month - 1, 1); // Month is 0-based in JavaScript Date
+    const endDate = new Date(year, month, 0); // Last day of the month
+
+    // Perform an aggregation to get leave details along with user and supervisor information
+    const userLeaves = await LeaveModel.aggregate([
+      { $match: { 
+          userId: new mongoose.Types.ObjectId(userId),
+          startDate: { $gte: startDate, $lte: endDate }
+        } 
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "userDetails"
+        }
+      },
+      { $unwind: "$userDetails" }, // Unwind the userDetails array
+      {
+        $lookup: {
+          from: "users",
+          localField: "userDetails.supervisor",
+          foreignField: "_id",
+          as: "supervisorDetails"
+        }
+      },
+      { $unwind: "$supervisorDetails" }, // Unwind the supervisorDetails array
+      {
+        $project: {
+          _id: 1,
+          userId: 1,
+          startDate: 1,
+          endDate: 1,
+          type: 1,
+          reason: 1,
+          adminApproval: 1,
+          supervisorApproval: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          "userDetails.firstName": 1,
+          "userDetails.lastName": 1,
+          "userDetails.email": 1,
+          "userDetails.designation": 1,
+          "userDetails.employmentType": 1,
+          "supervisorDetails.firstName": 1,
+          "supervisorDetails.lastName": 1,
+          "supervisorDetails.email": 1,
+          "supervisorDetails.designation": 1,
         }
       }
     ]);
@@ -340,135 +687,11 @@ export const getLeaveDetailsByUserIdController = async (req, res, next) => {
     res.status(200).json({ success: true, data: userLeaves });
   } catch (error) {
     // Handle error
-    console.log("err", error)
+    console.error("Error retrieving leaves with details:", error);
     next(error);
   }
 };
 
-
-// export const getLeaveDetailsByUserIdController = async (req, res, next) => {
-//   const { userId } = req.params;
-
-//   try {
-//     // Validate userId
-//     if (!userId) {
-//       throw new ErrorHandler(400, "Please provide all fields!");
-//     }
-
-//     // Check if userId is a valid ObjectId
-//     if (!mongoose.Types.ObjectId.isValid(userId)) {
-//       return res.status(400).json({ message: "Invalid parameters", success: false });
-//     }
-
-//     // Perform an aggregation to get leave details along with user information
-//     const userLeaves = await LeaveModel.aggregate([
-//       { $match: { userId: new mongoose.Types.ObjectId(userId) } },
-//       {
-//         $lookup: {
-//           from: "users", // The collection name in MongoDB
-//           localField: "userId",
-//           foreignField: "_id",
-//           as: "userDetails"
-//         }
-//       },
-//       { $unwind: "$userDetails" }, // Unwind the userDetails array
-//       {
-//         $project: {
-//           _id: 1,
-//           userId: 1,
-//           startDate: 1,
-//           endDate: 1,
-//           type: 1,
-//           reason: 1,
-//           adminApproval: 1,
-//           supervisorApproval: 1,
-//           createdAt: 1,
-//           updatedAt: 1,
-//           "userDetails.firstName": 1,
-//           "userDetails.lastName": 1,
-//           "userDetails.email": 1,
-//           "userDetails.designation": 1,
-//           "userDetails.employmentType": 1,
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: null,
-//           adminApprovalPending: {
-//             $push: {
-//               $cond: [
-//                 { $eq: ["$adminApproval", "Pending"] },
-//                 "$$ROOT",
-//                 null
-//               ]
-//             }
-//           },
-//           adminApprovalApproved: {
-//             $push: {
-//               $cond: [
-//                 { $eq: ["$adminApproval", "Approved"] },
-//                 "$$ROOT",
-//                 null
-//               ]
-//             }
-//           },
-//           adminApprovalRejected: {
-//             $push: {
-//               $cond: [
-//                 { $eq: ["$adminApproval", "Rejected"] },
-//                 "$$ROOT",
-//                 null
-//               ]
-//             }
-//           },
-//           supervisorApprovalPending: {
-//             $push: {
-//               $cond: [
-//                 { $eq: ["$supervisorApproval", "Pending"] },
-//                 "$$ROOT",
-//                 null
-//               ]
-//             }
-//           },
-//           supervisorApprovalApproved: {
-//             $push: {
-//               $cond: [
-//                 { $eq: ["$supervisorApproval", "Approved"] },
-//                 "$$ROOT",
-//                 null
-//               ]
-//             }
-//           },
-//           supervisorApprovalRejected: {
-//             $push: {
-//               $cond: [
-//                 { $eq: ["$supervisorApproval", "Rejected"] },
-//                 "$$ROOT",
-//                 null
-//               ]
-//             }
-//           }
-//         }
-//       },
-//       {
-//         $project: {
-//           adminApprovalPending: { $filter: { input: "$adminApprovalPending", as: "item", cond: { $ne: ["$$item", null] } } },
-//           adminApprovalApproved: { $filter: { input: "$adminApprovalApproved", as: "item", cond: { $ne: ["$$item", null] } } },
-//           adminApprovalRejected: { $filter: { input: "$adminApprovalRejected", as: "item", cond: { $ne: ["$$item", null] } } },
-//           supervisorApprovalPending: { $filter: { input: "$supervisorApprovalPending", as: "item", cond: { $ne: ["$$item", null] } } },
-//           supervisorApprovalApproved: { $filter: { input: "$supervisorApprovalApproved", as: "item", cond: { $ne: ["$$item", null] } } },
-//           supervisorApprovalRejected: { $filter: { input: "$supervisorApprovalRejected", as: "item", cond: { $ne: ["$$item", null] } } },
-//         }
-//       }
-//     ]);
-
-//     // Respond with the categorized leave records and user details
-//     res.status(200).json({ success: true, data: userLeaves[0] });
-//   } catch (error) {
-//     // Handle error
-//     next(error);
-//   }
-// };
 
 
 export const getLeaveDetailsByIdController = async (req, res, next) => {
@@ -521,7 +744,11 @@ export const updateLeaveController = async (req, res, next) => {
     const leaveById = await LeaveModel.findOne({ _id: leaveId });
 
     if (!leaveById) {
-      res.status(404).json({ message: "Leave Not Found", success: false });
+      return res.status(404).json({ message: "Leave Not Found", success: false });
+    }
+
+    if(leaveById.adminApproval !== "Pending" || leaveById.supervisorApproval !== "Pending"){
+      return res.status(404).json({ message: "Cannot update the leave", success: false });
     }
 
 
@@ -708,6 +935,17 @@ export const deleteLeaveByIdController = async (req, res, next) => {
   }
 };
 
+// Delete all leaves
+export const deleteAllLeavesController = async (req, res, next) => {
+  try {
+    await LeaveModel.deleteMany({});
+    res.status(200).json({ success: true, message: 'All leave records deleted successfully.' });
+  } catch (error) {
+    //console.error('Error deleting leave records:', error);
+    next(error);
+  }
+};
+
 
 
 // Leave Stats
@@ -753,6 +991,7 @@ export const getLeaveStatisticsController = async (req, res, next) => {
     next(error);
   }
 };
+
 
 
 

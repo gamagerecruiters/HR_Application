@@ -16,7 +16,12 @@ import {
   getallSupervisorRejectedLeaveController,
   getallSuperAdminApprovedleaveController,
   getallSuperAdminRejectedleaveController,
-  getLeaveStatisticsController
+  getLeaveStatisticsController,
+  getLeavesBySupervisorController,
+  getLeaveDetailsByFilterController,
+  updateLeaveSupervisorApprovalController,
+  updateLeaveSuperAdminApprovalController,
+  getLeavesWithDetailsByUserIdfilterController
 } from "../controllers/leaveController.js";
 
 const leaveRouter = express.Router();
@@ -39,8 +44,20 @@ leaveRouter.get("/all-leave-admin-rejected", isAuthorized,  getallSuperAdminReje
 leaveRouter.get("/all-leave-admin-approved", isAuthorized,  getallSuperAdminApprovedleaveController);
 
 
+leaveRouter.get("/leaves-by-month-year/:userId", getLeavesWithDetailsByUserIdfilterController );
+
+
+leaveRouter.get("/leave/:userId/:filter", getLeaveDetailsByFilterController);
+
 
 leaveRouter.get("/get-leave/:userId", isAuthorized, getLeaveDetailsByUserIdController);
+
+leaveRouter.get("/leave/:supervisorId", getLeavesBySupervisorController);
+
+leaveRouter.put("/leave/:leaveId" ,  updateLeaveSupervisorApprovalController);
+
+leaveRouter.put("/leave-superAdminApproval/:leaveId" ,  updateLeaveSuperAdminApprovalController);
+
 
 leaveRouter.get("/get-leave-by-leaveId/:leaveId", isAuthorized, getLeaveDetailsByIdController);
 
@@ -52,6 +69,9 @@ leaveRouter.put("/update-leave-superAdminApproval/:leaveId", isAuthorized,  supe
 
 
 leaveRouter.delete("/delete-leave/:leaveId", isAuthorized, deleteLeaveByIdController);
+
+leaveRouter.delete("/delete-all-leave", deleteLeaveByIdController);
+
 
 
 leaveRouter.get("/leave-statistics", isAuthorized, getLeaveStatisticsController);
