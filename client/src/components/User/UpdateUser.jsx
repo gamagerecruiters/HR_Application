@@ -28,7 +28,7 @@ const UpdateUser = () => {
             withCredentials: true,
           }
         );
-        setFormData(response.data.user[0]);
+        setFormData(response.data.user);
         setLoading(false);
       } catch (error) {
         console.log("Error fetching user data:", error);
@@ -71,7 +71,7 @@ const UpdateUser = () => {
       });
       setUpdateSuccess(true); // Set update success status to true
 
-      if (user.userType === "Admin") {
+      if (user.userType === "SuperAdmin") {
         const statusUpdateRes = await axios.put(
           `http://localhost:8800/api-v1/user/update-user-status/${id}`,
           { status: formData.status },
@@ -164,7 +164,7 @@ const UpdateUser = () => {
                 placeholder="Enter phone"
               />
             </div>
-            {user && user.userType === "Admin" ? (
+            {user && user.userType === "SuperAdmin" ? (
               <>
                 <div>
                   <label className="block text-gray-700 text-sm font-semibold mb-2">

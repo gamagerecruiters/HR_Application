@@ -5,11 +5,12 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { sendToken } from "../middlewares/jwtValidation.js";
 import { sendForgetPasswordLinkByEmail } from "../utils/mailer.js";
 import jwt from "jsonwebtoken";
-import {showUserOutput} from "../helpers/extractUserDetails.js"
+import { showUserOutput } from "../helpers/extractUserDetails.js";
 import {
   isAuthorizedUserAccess,
-  isAuthorizedAdminAccess
-} from "../services/authService.js"
+  isAuthorizedAdminAccess,
+} from "../services/authService.js";
+import mongoose from "mongoose";
 
 export const registerController = catchAsyncError(async (req, res, next) => {
   const {
@@ -21,6 +22,7 @@ export const registerController = catchAsyncError(async (req, res, next) => {
     designation,
     employmentType,
     userType,
+    supervisorId,
   } = req.body;
   try {
     // validate
@@ -57,12 +59,30 @@ export const registerController = catchAsyncError(async (req, res, next) => {
       newUserObject.phone = phone;
     }
 
+    //Add supervisor id if it has value
+    if (supervisorId) {
+      // Check if supervisorId is a valid ObjectId
+      if (!mongoose.Types.ObjectId.isValid(supervisorId)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid parameters", success: false });
+      }
+
+      const supervisor = await UserModel.findById(supervisorId);
+      if (!supervisor || supervisor.userType !== "Admin") {
+        return res
+          .status(400)
+          .json({
+            message: "Invalid supervisor ID or supervisor is not an Admin",
+          });
+      }
+      newUserObject.supervisor = supervisorId
+    }
 
 
     // Create a new user if the user does not exist
     const newUser = new UserModel(newUserObject);
     await newUser.save(); // Save the user to the database
-
 
     sendToken(newUser, 200, res, "User registered successfully!"); // Send the token to the user
   } catch (error) {
@@ -96,11 +116,9 @@ export const loginController = catchAsyncError(async (req, res, next) => {
     }
 
     // check user status is Active or Inactive
-    if (existingUser.status == "Inactive"){
+    if (existingUser.status == "Inactive") {
       return next(new ErrorHandler(400, "User is inactive "));
     }
-
-
 
     sendToken(existingUser, 200, res, "User logged in successfully!"); // Send the token to the user
   } catch (error) {
@@ -131,10 +149,12 @@ export const updateUserPasswordController = async (req, res, next) => {
     throw new Error("All fields are required");
   }
 
-
   try {
     // Verify if the logged-in user is authorized (either the user or an admin)
-    if (!isAuthorizedUserAccess(req.user) && !isAuthorizedAdminAccess(req.user, req.isAdmin)) {
+    if (
+      !isAuthorizedUserAccess(req.user) &&
+      !isAuthorizedAdminAccess(req.user, req.isAdmin)
+    ) {
       return res
         .status(401)
         .json({ message: "Unauthorized Access", success: false });
@@ -144,7 +164,11 @@ export const updateUserPasswordController = async (req, res, next) => {
     if (req.user._id.toString() !== userId && !req.isAdmin) {
       return res
         .status(403)
-        .json({ message: "Forbidden: You can only update your own password or Contact Admin", success: false });
+        .json({
+          message:
+            "Forbidden: You can only update your own password or Contact Admin",
+          success: false,
+        });
     }
 
     const user = await UserModel.findOne({ _id: userId });
@@ -202,8 +226,8 @@ export const forgetPasswordSendEmailController = async (req, res, next) => {
       { _id: userfind._id },
       { verifytoken: token },
       { new: true }
-    )
-    
+    );
+
     if (setusertoken) {
       sendForgetPasswordLinkByEmail(userfind, setusertoken, res);
     }

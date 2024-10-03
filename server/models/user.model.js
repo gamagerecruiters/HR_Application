@@ -3,6 +3,7 @@ import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
 import validator from "validator";
 
+// Create user schema
 const userSchema = new mongoose.Schema(
   {
     firstName: {
@@ -35,7 +36,7 @@ const userSchema = new mongoose.Schema(
     },
     userType: {
       type: String,
-      enum: ["Admin", "User"], // Only accept 'Admin' or 'User' values
+      enum: ["Admin", "User", "SuperAdmin"], // Only accept 'Admin', 'User', or 'SuperAdmin' values
       default: "User",
     },
     status: {
@@ -48,15 +49,15 @@ const userSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
-    company : {
-      type : String,
-      default : "Gamage Recruiters (Pvt) Ltd",
-      required : false
-    },
-    verifytoken:{
+    company: {
       type: String,
-      required : false
-  },
+      default: "Gamage Recruiters (Pvt) Ltd",
+      required: false,
+    },
+    verifytoken: {
+      type: String,
+      required: false,
+    },
     // Google Authentication part
     googleId: {
       type: String,
@@ -66,6 +67,24 @@ const userSchema = new mongoose.Schema(
     },
     displayName: String,
     image: String,
+    // New supervisor field
+    supervisor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      validate: {
+        validator: async function (value) {
+          if (value) {
+            const supervisor = await mongoose.model("User").findById(value);
+            if(supervisor && supervisor.userType === "Admin"){
+              return value
+            }
+          }
+          return null; // If no supervisor is set, it's valid
+        },
+        message: "Supervisor must be a valid Admin user.",
+      },
+      required : false
+    },
   },
   { timestamps: true }
 );
@@ -74,25 +93,20 @@ const userSchema = new mongoose.Schema(
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
-  console.log(this.password)
   this.password = await bcrypt.hash(this.password, salt);
-  next()
+  next();
 });
-
-
 
 // Compare the password with the hashed password in the database
 userSchema.methods.comparePassword = async function (password) {
-  const isMatch = await bcrypt.compare(password, this.password);
-  return isMatch;
+  return bcrypt.compare(password, this.password);
 };
 
 // Generate a JWT token for the user
 userSchema.methods.getJWTToken = function () {
-  const token = JWT.sign({ _id: this._id }, process.env.JWT_SECRET_KEY, {
+  return JWT.sign({ _id: this._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: "1d",
   });
-  return token;
 };
 
 const UserModel = mongoose.model("User", userSchema);

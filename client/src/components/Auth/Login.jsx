@@ -62,6 +62,8 @@ const Login = () => {
                   <option value="">Select the user type</option>
                   <option value="Admin">Admin</option>
                   <option value="User">User</option>
+                  <option value="SuperAdmin">Super Admin</option>
+
                 </select>
                 <FaRegUser />
               </div>

@@ -21,6 +21,7 @@ const AllUsersDetails1 = () => {
       const usersWithId = response.data.users.map((user) => ({
         ...user,
         id: user._id, // Use _id as the id
+        supervisorLastName : user.supervisor?.lastName || "N/A"
       }));
       setUsers(usersWithId);
       setLoading(false);
@@ -71,6 +72,7 @@ const AllUsersDetails1 = () => {
     { field: "employmentType", headerName: "Employment Type", width: 200 },
     { field: "userType", headerName: "User Type", width: 150 },
     { field: "status", headerName: "Status", width: 120 },
+    { field: "supervisorLastName", headerName: "Supervisor", width: 150 },
     { field: "phone", headerName: "Phone", width: 150 },
     { field: "company", headerName: "Company", width: 200 },
     {
@@ -137,7 +139,7 @@ const AllUsersDetails1 = () => {
         <div className=" flex justify-center gap-2">
           <Link to={'/add-user'}>
             <button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded">
-              AddUser
+              Add User
             </button>
           </Link>
 

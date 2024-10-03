@@ -16,6 +16,7 @@ export const isAuthorized = catchAsyncError(async (req, res, next) => {
 
   if(req.user){
     req.isAdmin = req.user.userType === "Admin" ? true : false
+    req.isSuperAdmin = req.user.userType === "SuperAdmin" ? true : false
   }
 
   next();

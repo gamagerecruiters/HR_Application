@@ -16,3 +16,10 @@ export const isAuthorizedAdminAccess = (user,isAdmin) => {
     }
     return true
 }
+
+export const isAuthorizedSuperAdminAccess = (user,isSuperAdmin) => {
+    if(!isAuthorizedUserAccess(user) || !isSuperAdmin){
+        return false
+    }
+    return true
+}

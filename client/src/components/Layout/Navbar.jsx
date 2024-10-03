@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 const Navbar = () => {
   const [show, setShow] = useState(false);
   const { isAuthorized, setIsAuthorized, user } = useContext(Context);
+  console.log(user);
   const navigateTo = useNavigate();
 
   const handleLogout = async () => {
@@ -40,8 +41,6 @@ const Navbar = () => {
               </Link>
             </li>
 
-            
-
             <li>
               <Link to={"/job/getAll"} onClick={() => setShow(false)}>
                 ALL JOBS
@@ -55,28 +54,35 @@ const Navbar = () => {
             </li>
 
             <li>
+              <Link to={"/leave"} onClick={() => setShow(false)}>
+                LEAVE
+              </Link>
+            </li>
+
+            <li>
               <Link to={"/applications/me"} onClick={() => setShow(false)}>
                 {user && user.userType === "Admin"
                   ? "APPLICANT'S APPLICATIONS"
                   : "MY APPLICATIONS"}
               </Link>
             </li>
-            <li>
-              {(user && user.userType === "Admin") && (
-                <Link to={"/user"} onClick={() => setShow(false)}>
-                  {"user".toUpperCase()}
-                </Link>
-              )}
-            </li>
-            <li>
-              {(user && user.userType === "Admin") && (
-                <Link to={"/employee"} onClick={() => setShow(false)}>
-                  {"employee".toUpperCase()}
-                </Link>
-              )}
-            </li>
-            {user && user.userType === "Admin" ? (
+            {user && user.userType === "SuperAdmin" ? 
+            (<>
+              <li>
+                  <Link to={"/user"} onClick={() => setShow(false)}>
+                    {"user".toUpperCase()}
+                  </Link>
+                </li>
+            </>) 
+            : (<></>)}
+            {user && (user.userType === "Admin" || user.userType === "SuperAdmin") ? (
               <>
+                
+                <li>
+                  <Link to={"/employee"} onClick={() => setShow(false)}>
+                    {"employee".toUpperCase()}
+                  </Link>
+                </li>
                 <li>
                   <Link to={"/job/post"} onClick={() => setShow(false)}>
                     POST NEW JOB
@@ -91,7 +97,6 @@ const Navbar = () => {
             ) : (
               <></>
             )}
-            
 
             <button onClick={handleLogout}>LOGOUT</button>
           </ul>
