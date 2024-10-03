@@ -11,6 +11,8 @@ import Programs from "views/examples/Programs";
 import SalarySheet from "views/examples/Salary";
 import ApplyEmployee from "views/examples/ApplyEmployee";
 import AddJobs from "views/examples/AddJobs";
+import ViewTickets from "views/tickets/ViewTickets";
+import TicketSystem from "views/tickets/TicketSystem";
 
 var routes = [
   {
@@ -83,6 +85,20 @@ var routes = [
     icon: "ni ni-curved-next text-default",
     component: <LeavesApplyForm />,
     layout: "/admin",
+  },
+  {
+    path: "/tickets",
+    name: "Tickets",
+    icon: "ni ni-single-copy-04 text-blue",
+    component: <ViewTickets/>,
+    layout: "/admin",
+  },
+  {
+    path: "/tickets",
+    name: "Tickets",
+    icon: "ni ni-single-copy-04 text-blue",
+    component: <TicketSystem/>,
+    layout: "/user",
   },
   {
     path: "/user-profile",
