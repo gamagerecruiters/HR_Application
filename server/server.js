@@ -23,6 +23,9 @@ import fileUpload from "express-fileupload";
 import dbConnection from "./config/dbConnection.js"; //MongoDB Connection File from config folder
 import { errorMiddleware } from "./middlewares/error.js";
 
+
+import ticketRoutes from "./routes/ticketRoutes.js"
+
 dotenv.config();
 
 const app = express(); //Rest object
@@ -40,6 +43,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const PORT = process.env.PORT || 8800;
+
+
+//tickets
+app.use('/api/tickets', ticketRoutes)
 
 // MONGODB CONNECTION
 dbConnection();
