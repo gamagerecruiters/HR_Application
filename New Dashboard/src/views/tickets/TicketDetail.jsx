@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { base_url } from "utils/base_url.js";
 import {
   Button,
   Card,
@@ -13,6 +14,7 @@ import {
   CardHeader,
 } from "reactstrap";
 import Header from "components/Headers/Header";
+import axios from 'axios'; // Import axios to make API requests
 
 const AdminViewTicket = () => {
   const { id } = useParams(); // Get the ticket ID from the URL
@@ -20,32 +22,42 @@ const AdminViewTicket = () => {
   const [status, setStatus] = useState('');
   const [message, setMessage] = useState('');
 
+  // Fetch the ticket details from the backend when the component mounts
   useEffect(() => {
-    // Dummy ticket data for demonstration
-    const dummyTicket = {
-      _id: id, // Simulate the ticket ID
-      description: "This is a sample ticket description.",
-      leaveType: "Educational",
-      files: [
-        { filePath: "https://via.placeholder.com/150" }, // Dummy file URL
-        { filePath: "https://via.placeholder.com/150" },
-      ],
-      status: "pending",
+    const fetchTicketDetails = async () => {
+      try {
+        const response = await axios.get(`${base_url}/tickets/${id}`); // Assuming /api/tickets/:id is your endpoint
+        const ticketData = response.data;
+        setTicket(ticketData);
+        setStatus(ticketData.status); // Set the initial status
+      } catch (error) {
+        console.error("Error fetching ticket details:", error);
+      }
     };
 
-    // Set the ticket data and status from dummy data
-    setTicket(dummyTicket);
-    setStatus(dummyTicket.status);
-  }, [id]); 
+    fetchTicketDetails();
+  }, [id]);
 
+  // Handle status update
   const handleUpdateStatus = async () => {
-    // Handle status update (mocked for now)
-    alert(`Status updated to: ${status}`);
+    try {
+      await axios.put(`${base_url}/tickets/${id}/status`, { status }); // Assuming /api/tickets/:id/status is your endpoint
+      alert(`Status updated to: ${status}`);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to update status");
+    }
   };
 
+  // Handle sending a message
   const handleSendMessage = async () => {
-    // Handle sending a message (mocked for now)
-    alert(`Message sent: ${message}`);
+    try {
+      await axios.post(`${base_url}/tickets/${id}/message`, { message }); // Assuming /api/tickets/:id/message is your endpoint
+      alert(`Message sent: ${message}`);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Failed to send message");
+    }
   };
 
   if (!ticket) return <p>Loading...</p>;

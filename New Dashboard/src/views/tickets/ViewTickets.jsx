@@ -1,49 +1,36 @@
-import React, { useState, useEffect } from "react";
 import Header from "components/Headers/Header";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Alert, Card, CardHeader, Col, Container, Row } from "reactstrap";
+import { base_url } from "utils/base_url.js";
 import TicketItems from "./TicketItems";
-import { useNavigate } from 'react-router-dom';
-import {
-  Card,
-  CardHeader,
-  Row,
-  Col,
-  Container,
-  Alert
-} from "reactstrap";
 
 const ViewTickets = () => {
-  // Dummy data for testing
-  const dummyTickets = [
-    {
-      _id: "1",
-      leaveType: "Sick Leave",
-      description: "Fever and cold, need rest for 3 days",
-      files: "https://via.placeholder.com/100", // Dummy image URL
-      fileType: "image",
-      status: "in-progress"
-    },
-    {
-      _id: "2",
-      leaveType: "Casual Leave",
-      description: "Family function, need leave for 2 days",
-      files: "",
-      fileType: "",
-      status: "Approved"
-    },
-    {
-      _id: "3",
-      leaveType: "Vacation",
-      description: "Planning a trip for a week",
-      files: "https://www.example.com/sample.pdf", // Dummy PDF URL
-      fileType: "pdf",
-      status: "Rejected"
-    }
-  ];
-
-  const [tickets, setTickets] = useState(dummyTickets);
+  const [tickets, setTickets] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // Fetch tickets from backend
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const response = await fetch(`${base_url}/tickets/gettickets`); // Your API endpoint for fetching tickets
+        console.log("comes here" + response);
+        if (!response.ok) {
+          throw new Error("Failed to fetch tickets");
+        }
+        const data = await response.json();
+        setTickets(data);
+      } catch (error) {
+        setError("Error fetching tickets. Please try again later.");
+        console.error("Error fetching tickets:", error);
+      }
+    };
+
+    fetchTickets();
+  }, []);
+
+  // Handle status change and update on backend
   const handleStatusChange = async (ticketId, currentStatus) => {
     const newStatus =
       currentStatus === "in-progress"
@@ -53,10 +40,24 @@ const ViewTickets = () => {
         : "in-progress";
 
     try {
-      // Simulate an API response for the status update
-      setTickets(tickets.map((ticket) =>
-        ticket._id === ticketId ? { ...ticket, status: newStatus } : ticket
-      ));
+      const response = await fetch(`/api/tickets/${ticketId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update status");
+      }
+
+      // Update the UI with the new status
+      setTickets(
+        tickets.map((ticket) =>
+          ticket._id === ticketId ? { ...ticket, status: newStatus } : ticket
+        )
+      );
     } catch (error) {
       setError("Failed to update status. Please try again later.");
       console.error("Error updating ticket status:", error);
@@ -84,7 +85,10 @@ const ViewTickets = () => {
           </CardHeader>
           <div className="p-3">
             {tickets.map((ticket) => (
-              <Row key={ticket._id} className="align-items-center border-bottom py-2">
+              <Row
+                key={ticket._id}
+                className="align-items-center border-bottom py-2"
+              >
                 <Col className="col-2">{ticket._id}</Col>
                 <Col className="col-2">
                   <p className="mb-0">{ticket.leaveType}</p>
@@ -97,9 +101,19 @@ const ViewTickets = () => {
                     <ul className="list-unstyled mb-0">
                       <li>
                         {ticket.fileType === "pdf" ? (
-                          <a href={ticket.files} target="_blank" rel="noopener noreferrer">View PDF</a>
+                          <a
+                            href={ticket.files}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View PDF
+                          </a>
                         ) : (
-                          <img src={ticket.files} alt="file preview" style={{ maxWidth: "100%" }} />
+                          <img
+                            src={ticket.files}
+                            alt="file preview"
+                            style={{ maxWidth: "100%" }}
+                          />
                         )}
                       </li>
                     </ul>
@@ -118,7 +132,9 @@ const ViewTickets = () => {
                         ? "badge-danger"
                         : "badge-secondary"
                     }`}
-                    onClick={() => handleStatusChange(ticket._id, ticket.status)}
+                    onClick={() =>
+                      handleStatusChange(ticket._id, ticket.status)
+                    }
                     role="button"
                     tabIndex="0"
                     style={{ cursor: "pointer" }}

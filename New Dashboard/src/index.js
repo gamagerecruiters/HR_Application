@@ -11,9 +11,10 @@ import AuthLayout from "layouts/Auth.js";
 import { Provider } from "react-redux";
 import { store } from "./app/store.js";
 import ViewTickets from "views/tickets/ViewTickets.jsx";
-import TicketDetails from "views/tickets/TicketDetail.jsx";
 import UserTickets from "views/tickets/UserTicket.jsx";
-import TicketSystem from "views/tickets/TicketSystem.jsx";
+import TicketDetail from "views/tickets/TicketDetail.jsx"
+
+
 
 
 
@@ -28,10 +29,10 @@ root.render(
         <Route path="*" element={<Navigate to="/admin/index" replace />} />
         
         {/* <Route path="/admin/tickets" element={<ViewTickets/>} /> */}
-      <Route path="/admin/tickets/:ticketId" element={<TicketDetails/>}/>
+      <Route path="/admin/tickets" element={<ViewTickets/>}/>
       <Route path="/user/tickets" element={<UserTickets/>}/>
+      <Route path="/admin/tickets/:ticketId" element={<TicketDetail/>}/>
 
-      <Route path="/user/tickets" element={<TicketSystem/>}/>
 
       </Routes>
     </BrowserRouter>

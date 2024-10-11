@@ -1,25 +1,34 @@
 import express from "express";
 import {
-    createTicket,
-    getTickets,
-    viewTicket,
-    updateTicketStatus,
-    addCommentToTicket,
-    updateTicket,
-    deleteTicket,
-    sendMessageToUser,
-} from '../controllers/ticketController.js';
+  addCommentToTicket,
+  createTicket,
+  getTickets,
+  getUserTickets,
+  sendMessageToUser,
+  updateTicket,
+  updateTicketStatus,
+} from "../controllers/ticketController.js";
 
 const router = express.Router();
 
-// Routes
-router.post('/', createTicket);
-router.get('/', getTickets); 
-router.get('/view-tickets/:id', viewTicket);
-router.put('/:id/status', updateTicketStatus);
-router.post('/:id/comment', addCommentToTicket); // Add comment route
-router.put('/:id/message', sendMessageToUser); // Send message route
-router.put('/:id', updateTicket);
-router.delete('/:id', deleteTicket);
+// Create Ticket
+router.post("/", createTicket);
+
+// Get all tickets for admin
+router.get("/gettickets", getTickets);
+
+// Update ticket (Admin functionality)
+router.put("/:id", updateTicket);
+
+router.get("/:id", getUserTickets);
+
+// Add comment to a ticket
+router.post("/:id/comment", addCommentToTicket);
+
+// Update ticket status
+router.put("/:id/status", updateTicketStatus);
+
+// Send message to user
+router.post("/:id/message", sendMessageToUser);
 
 export default router;

@@ -5,6 +5,7 @@ import jobsRoute from "./jobsRoute.js"; //* Imported the jobsRoute from the rout
 import applicationRoute from "./applicationRoute.js"; //* Imported the applicationRoute from the routes folder
 import employeeRouter from "./employeeRoute.js";
 import leaveRouter from "./leaveRoute.js";
+import ticketRoutes from "./ticketRoutes.js"
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.use(`${path}application`, applicationRoute); //api-v1/application/
 router.use(`${path}job`, jobsRoute); //api-v1/job/
 router.use(`${path}employee`, employeeRouter); //api-v1/employee/
 router.use(`${path}leave`, leaveRouter); //api-v1/leave/
+router.use(`${path}tickets`, ticketRoutes);
 
 
 

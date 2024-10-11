@@ -1,78 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { base_url } from "utils/base_url.js";
+
+import axios from "axios"; // Assuming you're using Axios for API calls
 import Header from "components/Headers/Header";
 import {
+  Button,
   Card,
   CardHeader,
-  Container,
-  Row,
   Col,
-  Button,
+  Container,
   Form,
   FormGroup,
   Input,
   Label,
   Modal,
-  ModalHeader,
   ModalBody,
   ModalFooter,
+  ModalHeader,
+  Row,
 } from "reactstrap";
 
-const dummyTickets = [
-  {
-    _id: "1",
-    userId: "123",
-    leaveType: "Personal",
-    description: "Going on vacation",
-    files: null,
-    status: "in-progress",
-    fileType: null,
-    adminMessage: "", // Admin message or comment
-  },
-  {
-    _id: "2",
-    userId: "456",
-    leaveType: "Educational",
-    description: "Attending a workshop",
-    files: "https://example.com/file.pdf",
-    status: "Approved",
-    fileType: "pdf",
-    adminMessage: "Approved. Have a great time at the workshop!",
-  },
-  {
-    _id: "3",
-    userId: "123",
-    leaveType: "Medical",
-    description: "Medical check-up",
-    files: "https://example.com/image.jpg",
-    status: "Rejected",
-    fileType: "image",
-    adminMessage: "Rejected. Please provide a doctor's note.",
-  },
-  {
-    _id: "4",
-    userId: "789",
-    leaveType: "Personal",
-    description: "Family event",
-    files: "https://example.com/image.jpg",
-    fileType: "image",
-    status: "in-progress",
-    adminMessage: "",
-  },
-  {
-    _id: "5",
-    userId: "123",
-    leaveType: "Educational",
-    description: "Conference",
-    files: "https://example.com/image.jpg",
-    fileType: "image",
-    status: "Approved",
-    adminMessage: "Approved. Best wishes for the conference.",
-  },
-];
-
 const UserTickets = () => {
-  const currentUserId = "123"; // Simulated current user ID
-  const [tickets, setTickets] = useState(dummyTickets);
+  const currentUserId = "123"; // Simulated current user ID, this can be dynamic if you're using auth
+  const [tickets, setTickets] = useState([]);
   const [newTicket, setNewTicket] = useState({
     leaveType: "",
     description: "",
@@ -83,18 +33,22 @@ const UserTickets = () => {
 
   const toggleModal = () => setModal(!modal);
 
-  // Fetch tickets from Local Storage on component mount
+  // Fetch tickets from backend when the component mounts
   useEffect(() => {
-    const savedTickets = localStorage.getItem("tickets");
-    if (savedTickets) {
-      setTickets(JSON.parse(savedTickets)); // Parse and set the tickets from Local Storage
-    }
-  }, []);
+    const fetchTickets = async () => {
+      try {
+        const response = await axios.get(
+          `${base_url}/tickets/${currentUserId}`
+        ); // Replace with your backend endpoint
+        console.log("tickets " + response.data);
+        setTickets(response.data);
+      } catch (error) {
+        console.error("Error fetching tickets:", error);
+      }
+    };
 
-  // Save tickets to Local Storage whenever tickets state changes
-  useEffect(() => {
-    localStorage.setItem("tickets", JSON.stringify(tickets));
-  }, [tickets]);
+    fetchTickets();
+  }, [currentUserId]);
 
   // Handle input changes for the form
   const handleInputChange = (e) => {
@@ -105,46 +59,69 @@ const UserTickets = () => {
   // Handle file upload
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    setNewTicket({ 
-      ...newTicket, 
-      files: URL.createObjectURL(file),
-      fileType: file.type.includes('pdf') ? 'pdf' : 'image'
+    setNewTicket({
+      ...newTicket,
+      files: file,
+      fileType: file.type.includes("pdf") ? "pdf" : "image",
     });
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  // Simplified Axios request without files
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newTicketData = {
-      ...newTicket,
-      _id: String(tickets.length + 1),
-      userId: currentUserId,
-      status: "in-progress",
-      adminMessage: "", // New ticket has no admin message initially
-    };
-    setTickets([...tickets, newTicketData]);
-    setNewTicket({
-      leaveType: "",
-      description: "",
-      files: null,
-      fileType: null,
-    });
-    toggleModal(); // Close the modal after submission
+
+    // Create FormData to handle file uploads along with text fields
+    const formData = new FormData();
+    formData.append("leaveType", newTicket.leaveType);
+    formData.append("description", newTicket.description);
+    formData.append("userName", "123");
+
+    // Check if file exists before appending
+    if (newTicket.files) {
+      formData.append("files", newTicket.files);
+      formData.append("fileType", newTicket.fileType); // Include file type
+    }
+
+    try {
+      const response = await axios.post(`${base_url}/tickets`, formData, {
+        headers: {
+          "Content-Type": "form-data", // Required for file uploads
+        },
+      });
+      console.log("Ticket submitted successfully:", response.data);
+
+      // Update ticket list
+      setTickets([...tickets, response.data]);
+
+      // Reset form
+      setNewTicket({
+        leaveType: "",
+        description: "",
+        files: null,
+        fileType: null,
+      });
+      toggleModal(); // Close modal
+    } catch (error) {
+      // console.error("Error submitting ticket:", error);
+    }
   };
 
   // Filter tickets to show only the current user's tickets
-  const userTickets = tickets.filter(ticket => ticket.userId === currentUserId);
+  // const userTickets = tickets.filter(
+  //   (ticket) => ticket.userId === currentUserId
+  // );
 
   return (
     <>
       <Header />
-    
+
       <Container className="mt--9" fluid>
         {/* Button to Open Modal */}
         <Button color="primary" onClick={toggleModal} className="mt-4">
           Create New Ticket
         </Button>
-        <Card className="shadow">   
+        <Card className="shadow">
           <CardHeader className="border-0">
             <h3 className="mb-0">My Tickets</h3>
           </CardHeader>
@@ -158,8 +135,11 @@ const UserTickets = () => {
             </Row>
           </CardHeader>
           <div className="p-3">
-            {userTickets.map((ticket) => (
-              <Row key={ticket._id} className="align-items-center border-bottom py-2">
+            {tickets.map((ticket) => (
+              <Row
+                key={ticket._id}
+                className="align-items-center border-bottom py-2"
+              >
                 <Col className="col-2">{ticket._id}</Col>
                 <Col className="col-2">
                   <p className="mb-0">{ticket.leaveType}</p>
@@ -172,9 +152,19 @@ const UserTickets = () => {
                     <ul className="list-unstyled mb-0">
                       <li>
                         {ticket.fileType === "pdf" ? (
-                          <a href={ticket.files}>View PDF</a>
+                          <a
+                            href={ticket.files}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View PDF
+                          </a>
                         ) : (
-                          <img src={ticket.files} alt="file preview" style={{ maxWidth: "100%" }} />
+                          <img
+                            src={ticket.files}
+                            alt="file preview"
+                            style={{ maxWidth: "100%" }}
+                          />
                         )}
                       </li>
                     </ul>
@@ -201,7 +191,7 @@ const UserTickets = () => {
             ))}
           </div>
         </Card>
-        
+
         {/* Modal for Creating New Ticket */}
         <Modal isOpen={modal} toggle={toggleModal}>
           <ModalHeader toggle={toggleModal}>Create New Ticket</ModalHeader>

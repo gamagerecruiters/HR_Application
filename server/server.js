@@ -1,30 +1,28 @@
-import path from "path";
-import express from "express";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
 import cloudinary from "cloudinary";
+import express from "express";
 import expressLayouts from "express-ejs-layouts";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-import morgan from "morgan";
 import "express-async-errors";
-import cookieParser from "cookie-parser";
+import morgan from "morgan";
 // import swaggerUi from "swagger-ui-express";
 // import swaggerDoc from "swagger-jsdoc";
 //Security Packages
-import helmet from "helmet";
-import xss from "xss-clean";
 import bodyParser from "body-parser";
 import mongoSanitize from "express-mongo-sanitize";
+import helmet from "helmet";
+import xss from "xss-clean";
 //Files Import
-import router from "./routes/index.js";
 import fileUpload from "express-fileupload";
 import dbConnection from "./config/dbConnection.js"; //MongoDB Connection File from config folder
 import { errorMiddleware } from "./middlewares/error.js";
+import router from "./routes/index.js";
 
-
-import ticketRoutes from "./routes/ticketRoutes.js"
+import ticketRoutes from "./routes/ticketRoutes.js";
 
 dotenv.config();
 
@@ -44,19 +42,28 @@ const __dirname = dirname(__filename);
 
 const PORT = process.env.PORT || 8800;
 
-
-//tickets
-app.use('/api/tickets', ticketRoutes)
-
 // MONGODB CONNECTION
 dbConnection();
 
 // middlenames
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173", //Allowed Cross-Origin Resource Sharing (CORS) with the specified origin
+//     allowedHeaders: ["Content-Type", "Authorization"], //Enabled Cross-Origin Resource Sharing (CORS) with all origins and allowed all headers.
+//     credentials: true,
+//   })
+// );
+
 app.use(
   cors({
-    origin: "http://localhost:5173", //Allowed Cross-Origin Resource Sharing (CORS) with the specified origin
-    allowedHeaders: ["Content-Type", "Authorization"], //Enabled Cross-Origin Resource Sharing (CORS) with all origins and allowed all headers.
+    origin: "http://localhost:3000", // Adjust the origin to your frontend's origin
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
+  })
+);
+app.use(
+  cors({
+    origin: "http://localhost:3000",
   })
 );
 app.use(xss());
