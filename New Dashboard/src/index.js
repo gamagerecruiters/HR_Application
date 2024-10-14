@@ -31,7 +31,7 @@ root.render(
         {/* <Route path="/admin/tickets" element={<ViewTickets/>} /> */}
       <Route path="/admin/tickets" element={<ViewTickets/>}/>
       <Route path="/user/tickets" element={<UserTickets/>}/>
-      <Route path="/admin/tickets/:ticketId" element={<TicketDetail/>}/>
+      <Route path="/admin/tickets/:id" element={<TicketDetail/>}/>
 
 
       </Routes>

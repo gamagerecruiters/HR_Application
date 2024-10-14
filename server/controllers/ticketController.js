@@ -24,7 +24,7 @@ export const getTickets = async (req, res) => {
 };
 
 export const createTicket = async (req, res) => {
-  const { description, userName, leaveType, files, fileType } = req.body;
+  const { userId,userEmail,description, userName, leaveType, files, fileType } = req.body;
 
   const newTicket = new Ticket({
     description,
@@ -33,6 +33,8 @@ export const createTicket = async (req, res) => {
     fileType,
     status: "pending", // Default status set to 'open'
     userName,
+    userId,
+    userEmail,
     createdAt: new Date(),
   });
 
@@ -94,6 +96,7 @@ export const viewTickets = async (req, res) => {
   res.status(201).json(tickets);
 };
 
+//view one user ticket in admin page
 export const viewTicket = async (req, res) => {
   const ticket = await Ticket.findById(req.params.id);
   if (!ticket) {

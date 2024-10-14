@@ -1,3 +1,4 @@
+// components/AdminViewTicket.jsx
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { base_url } from "utils/base_url.js";
@@ -21,16 +22,23 @@ const AdminViewTicket = () => {
   const [ticket, setTicket] = useState(null);
   const [status, setStatus] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState(null);
 
   // Fetch the ticket details from the backend when the component mounts
   useEffect(() => {
     const fetchTicketDetails = async () => {
       try {
-        const response = await axios.get(`${base_url}/tickets/${id}`); // Assuming /api/tickets/:id is your endpoint
+        const token = localStorage.getItem('token'); // Assuming JWT is stored in localStorage
+        const response = await axios.get(`${base_url}/tickets/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const ticketData = response.data;
         setTicket(ticketData);
         setStatus(ticketData.status); // Set the initial status
       } catch (error) {
+        setError("Error fetching ticket details. Please try again later.");
         console.error("Error fetching ticket details:", error);
       }
     };
@@ -41,22 +49,35 @@ const AdminViewTicket = () => {
   // Handle status update
   const handleUpdateStatus = async () => {
     try {
-      await axios.put(`${base_url}/tickets/${id}/status`, { status }); // Assuming /api/tickets/:id/status is your endpoint
-      alert(`Status updated to: ${status}`);
+      const token = localStorage.getItem('token'); // Assuming JWT is stored in localStorage
+      const response = await axios.put(`${base_url}/tickets/${id}/status`, { status }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      alert(`Status updated to: ${response.data.status}`);
+      setTicket(response.data); // Update ticket state with new status
     } catch (error) {
-      console.error("Error updating status:", error);
-      alert("Failed to update status");
+      setError("Failed to update status. Please try again later.");
+      console.error("Error updating ticket status:", error);
     }
   };
 
   // Handle sending a message
   const handleSendMessage = async () => {
     try {
-      await axios.post(`${base_url}/tickets/${id}/message`, { message }); // Assuming /api/tickets/:id/message is your endpoint
+      const token = localStorage.getItem('token'); // Assuming JWT is stored in localStorage
+      const response = await axios.post(`${base_url}/tickets/${id}/message`, { message }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       alert(`Message sent: ${message}`);
+      setTicket(response.data); // Update ticket state with new message
+      setMessage(''); // Clear message input
     } catch (error) {
+      setError("Failed to send message. Please try again later.");
       console.error("Error sending message:", error);
-      alert("Failed to send message");
     }
   };
 
@@ -66,6 +87,9 @@ const AdminViewTicket = () => {
     <>
       <Header />
       <Container className="mt--7" fluid>
+        {/* Display error if any */}
+        {error && <div className="alert alert-danger">{error}</div>}
+
         <Row className="d-flex justify-content-center">
           <div className="col-md-8">
             <Card className="shadow">
@@ -74,6 +98,28 @@ const AdminViewTicket = () => {
               </CardHeader>
               <Form>
                 <Col md={10} className="mx-auto">
+
+                 {/* User ID */}
+                 <FormGroup row className="mt-3">
+                    <Label sm={4}>
+                      <strong>User ID:</strong>
+                    </Label>
+                    <Col sm={8}>
+                      <p>{ticket._id}</p>
+                    </Col>
+                  </FormGroup>
+
+                  {/* User Email */}
+                  <FormGroup row className="mt-3">
+                    <Label sm={4}>
+                      <strong>User Email:</strong>
+                    </Label>
+                    <Col sm={8}>
+                      <p>{ticket.userEmail}</p>
+                    </Col>
+                  </FormGroup>
+
+                  {/* Description */}
                   <FormGroup row className="mt-3">
                     <Label sm={4}>
                       <strong>Description:</strong>
@@ -83,6 +129,7 @@ const AdminViewTicket = () => {
                     </Col>
                   </FormGroup>
 
+                  {/* Leave Type */}
                   <FormGroup row className="mt-3">
                     <Label sm={4}>
                       <strong>Leave Type:</strong>
@@ -92,19 +139,40 @@ const AdminViewTicket = () => {
                     </Col>
                   </FormGroup>
 
-                  {ticket.files && ticket.files.map((file, index) => (
-                    <FormGroup row key={index}>
+                  {/* Files */}
+                  {ticket.files && ticket.files.length > 0 && (
+                    <>
                       <Label sm={4}>
-                        <strong>File {index + 1}:</strong>
+                        <strong>Files:</strong>
                       </Label>
                       <Col sm={8}>
-                        <a href={file.filePath} className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
-                          View File
-                        </a>
+                        <ul className="list-unstyled mb-0">
+                          {ticket.files.map((file, index) => (
+                            <li key={index}>
+                              {file.filePath.endsWith('.pdf') ? (
+                                <a
+                                  href={`${base_url}${file.filePath}`}
+                                  className="text-blue-500 hover:underline"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  View PDF {index + 1}
+                                </a>
+                              ) : (
+                                <img
+                                  src={`${base_url}${file.filePath}`}
+                                  alt={`File ${index + 1}`}
+                                  style={{ maxWidth: "100%" }}
+                                />
+                              )}
+                            </li>
+                          ))}
+                        </ul>
                       </Col>
-                    </FormGroup>
-                  ))}
+                    </>
+                  )}
 
+                  {/* Update Status */}
                   <FormGroup row className="mt-4">
                     <Label sm={4} for="status">
                       Update Status
@@ -123,13 +191,18 @@ const AdminViewTicket = () => {
                     </Col>
                   </FormGroup>
 
+                  {/* Update Status Button */}
                   <div className="d-flex justify-content-center mt-3">
-                    <Button onClick={handleUpdateStatus} className="mb-4 rounded hover:bg-blue-700"
-                      style={{ backgroundColor: '#2563eb', color: '#ffffff' }} >
+                    <Button
+                      onClick={handleUpdateStatus}
+                      className="mb-4 rounded hover:bg-blue-700"
+                      style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                    >
                       Update Status
                     </Button>
                   </div>
 
+                  {/* Send Message */}
                   <FormGroup row className="mt-4">
                     <Label sm={4} for="message">
                       Send Message
@@ -146,9 +219,13 @@ const AdminViewTicket = () => {
                     </Col>
                   </FormGroup>
 
+                  {/* Send Message Button */}
                   <div className="d-flex justify-content-center mt-3">
-                    <Button onClick={handleSendMessage} className="mb-4 rounded hover:bg-blue-700"
-                      style={{ backgroundColor: '#2563eb', color: '#ffffff' }} >
+                    <Button
+                      onClick={handleSendMessage}
+                      className="mb-4 rounded hover:bg-blue-700"
+                      style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                    >
                       Send Message
                     </Button>
                   </div>
@@ -156,6 +233,11 @@ const AdminViewTicket = () => {
               </Form>
             </Card>
           </div>
+          <Row>
+            <Col md="12">
+              <Button color="primary" onClick={() => window.history.back()}>Back</Button>
+            </Col>
+          </Row>
         </Row>
       </Container>
     </>

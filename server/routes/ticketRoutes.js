@@ -7,6 +7,7 @@ import {
   sendMessageToUser,
   updateTicket,
   updateTicketStatus,
+  viewTicket
 } from "../controllers/ticketController.js";
 
 const router = express.Router();
@@ -20,7 +21,11 @@ router.get("/gettickets", getTickets);
 // Update ticket (Admin functionality)
 router.put("/:id", updateTicket);
 
+//Get user ticket
 router.get("/:id", getUserTickets);
+
+//Get admin one user ticket
+router.get("/getticktes/:id",viewTicket);
 
 // Add comment to a ticket
 router.post("/:id/comment", addCommentToTicket);
